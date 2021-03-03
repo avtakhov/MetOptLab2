@@ -47,7 +47,6 @@ public class GraphicEngine extends ApplicationAdapter {
         }
     }
 
-
     @Override
     public void create() {
         methods = new HashMap<>();
@@ -60,11 +59,11 @@ public class GraphicEngine extends ApplicationAdapter {
         graphic.setBounds(100, 100, 800, 800);
         stage.addActor(graphic);
         ArrayList<TextureRegionDrawable> textures = new ArrayList<>();
-        textures.add(getButtonImage("sources/dichotomy.png"));
-        textures.add(getButtonImage("sources/golden-section.png"));
-        textures.add(getButtonImage("sources/fibonacci.png"));
-        textures.add(getButtonImage("sources/parabola.png"));
-        textures.add(getButtonImage("sources/brent-comb.png"));
+        textures.add(getButtonImage("dichotomy.png"));
+        textures.add(getButtonImage("golden-section.png"));
+        textures.add(getButtonImage("fibonacci.png"));
+        textures.add(getButtonImage("parabola.png"));
+        textures.add(getButtonImage("brent-comb.png"));
         int index = 0;
         int coef = 0;
         float xCoord = 1200f;
