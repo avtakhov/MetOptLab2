@@ -22,7 +22,6 @@ import java.util.function.Function;
 
 public class GraphicEngine extends ApplicationAdapter {
     SpriteBatch batch;
-    TextureRegionDrawable textureRegionDrawable;
     BitmapFont bitmapFont;
     ShapeRenderer graphicRenderer;
     Stage stage;
@@ -56,7 +55,6 @@ public class GraphicEngine extends ApplicationAdapter {
         bitmapFont = new BitmapFont();
         graphicRenderer = new ShapeRenderer();
         stage = new Stage();
-        textureRegionDrawable = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("sources/memkek.jpg"))));
         RedPointFunc func = new RedPointFunc(target);
         graphic = new Graphic(graphicRenderer, x -> target.apply(x.doubleValue()).floatValue());
         graphic.setBounds(100, 100, 800, 800);
