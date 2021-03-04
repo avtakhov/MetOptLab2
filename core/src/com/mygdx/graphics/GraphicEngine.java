@@ -11,42 +11,29 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.methods.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class GraphicEngine extends ApplicationAdapter {
-    SpriteBatch batch;
-    BitmapFont bitmapFont;
-    ShapeRenderer graphicRenderer;
-    Stage stage;
-    Map<Button, Method> methods;
-    Function<Double, Double> target = x -> x - Math.log(x);
-    Graphic graphic;
+    private SpriteBatch batch;
+    private BitmapFont bitmapFont;
+    private ShapeRenderer graphicRenderer;
+    private Stage stage;
+    private List<Segment> processSegments = Collections.singletonList(new Segment(0.5, 4));
+    private List<Function<Double, Double>> processFunctions = Collections.emptyList();
+    private Map<Button, AbstractDrawableMethod> methods;
+    private final Function<Double, Double> target = x -> x - Math.log(x);
+    private Graphic graphic;
 
-    class RedPointFunc implements Function<Double, Double> {
-
-        final Function<Double, Double> func;
-        int count = 0;
-
-        RedPointFunc(final Function<Double, Double> func) {
-            this.func = func;
-        }
-
-        @Override
-        public Double apply(Double x) {
-            count++;
-            Double fx = func.apply(x);
-            graphic.renderPoints.add(new Point(x.floatValue(), fx.floatValue(), new Color((float) Math.log(count) / 3.5f, 0,0,1)));
-            return fx;
-        }
-    }
-
+    Slider slider;
+    Texture sliderBackgroundTex;
+    Texture sliderKnobTex;
 
     @Override
     public void create() {
@@ -55,8 +42,7 @@ public class GraphicEngine extends ApplicationAdapter {
         bitmapFont = new BitmapFont();
         graphicRenderer = new ShapeRenderer();
         stage = new Stage();
-        RedPointFunc func = new RedPointFunc(target);
-        graphic = new Graphic(graphicRenderer, x -> target.apply(x.doubleValue()).floatValue());
+        graphic = new Graphic(graphicRenderer, target);
         graphic.setBounds(100, 100, 800, 800);
         stage.addActor(graphic);
         ArrayList<TextureRegionDrawable> textures = new ArrayList<>();
@@ -66,11 +52,15 @@ public class GraphicEngine extends ApplicationAdapter {
         textures.add(getButtonImage("sources/parabola.png"));
         textures.add(getButtonImage("sources/brent-comb.png"));
         int index = 0;
-        int coef = 0;
         float xCoord = 1200f;
         float yCoord = 800f;
-        for (Method m : Algorithms.methodList(func)) {
-            System.out.println(index + " " + coef);
+        List<AbstractDrawableMethod> methodList = Arrays.asList(
+                new DichotomyMethod(target, 1e-3),
+                new GoldenSectionMethod(target),
+                new FibonacciMethod(target),
+                new ParabolaMethod(target),
+                new BrentCombMethod(target));
+        for (AbstractDrawableMethod m : methodList) {
             Button b = new ImageButton(textures.get(index));
             if (index % 3 == 0) {
                 xCoord += 200f;
@@ -80,8 +70,16 @@ public class GraphicEngine extends ApplicationAdapter {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     graphic.renderPoints.clear();
-                    func.count = 0;
-                    methods.get(b).findMin(0.5, 4, 1e-3);
+                    graphic.setSecondary(null);
+                    AbstractDrawableMethod method = methods.get(b);
+                    method.findMin(0.5, 4, 1e-3);
+                    processSegments = method.renderSegments();
+                    processFunctions = method.renderFunctions();
+                    List<Point> points = method.renderPoints();
+                    for (int i = 0; i < points.size(); ++i) {
+                        Point p = points.get(i);
+                        graphic.renderPoints.add(new ColoredPoint(p.x, p.y, new Color((float) Math.log(i) / 4, 0, 0, 1), 5));
+                    }
                 };
             });
             index++;
@@ -89,7 +87,31 @@ public class GraphicEngine extends ApplicationAdapter {
         }
         for (Button b : methods.keySet())
             stage.addActor(b);
-        Gdx.input.setInputProcessor(stage);
+
+        // slider
+        sliderBackgroundTex = new Texture(Gdx.files.internal("sources/slider_background.png"));
+        sliderKnobTex = new Texture(Gdx.files.internal("sources/slider_knob.png"));
+        Slider.SliderStyle ss = new Slider.SliderStyle();
+        ss.background = new TextureRegionDrawable(new TextureRegion(sliderBackgroundTex));
+        ss.knob = new TextureRegionDrawable(new TextureRegion(sliderKnobTex));
+        slider = new Slider(0f, 100f, 1f, false, ss);
+        slider.setPosition(1000, 200);
+        graphic.setHighlight(processSegments.get(0));
+        slider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                double percent = slider.getValue() / slider.getMaxValue();
+                graphic.setHighlight(processSegments.isEmpty()
+                        ? null
+                        : processSegments.get((int) ((processSegments.size() - 1) * percent)));
+
+                graphic.setSecondary(processFunctions.isEmpty()
+                        ? null
+                        : processFunctions.get((int) ((processFunctions.size() - 1) * percent)));
+            }
+        });
+        stage.addActor(slider);
+
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(graphic);
         inputMultiplexer.addProcessor(stage);

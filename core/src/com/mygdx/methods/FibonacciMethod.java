@@ -2,7 +2,7 @@ package com.mygdx.methods;
 
 import java.util.function.Function;
 
-public class FibonacciMethod extends AbstractAlgorithm {
+public class FibonacciMethod extends AbstractDrawableMethod {
 
     public FibonacciMethod(Function<Double, Double> func) {
         super(func);
@@ -10,6 +10,7 @@ public class FibonacciMethod extends AbstractAlgorithm {
 
     @Override
     public double findMin(double left, double right, double eps) {
+        clear();
         long fibPrevious = 1;
         long fibCurrent = 1;
         int n = 1;
@@ -24,6 +25,7 @@ public class FibonacciMethod extends AbstractAlgorithm {
         double fx1 = func.apply(x1);
         double fx2 = func.apply(x2);
         while (n > 0) {
+            addSegment(left, right);
             n--;
             if (fx1 < fx2) {
                 right = x2;
