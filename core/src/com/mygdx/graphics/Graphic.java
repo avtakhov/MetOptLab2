@@ -1,9 +1,12 @@
 package com.mygdx.graphics;
 
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
+import com.mygdx.methods.Point;
+import com.mygdx.methods.Segment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,23 +15,25 @@ import java.util.function.Function;
 public class Graphic extends Actor implements InputProcessor {
 
     private final ShapeRenderer renderer;
-    private float xl = -1;
-    private float yl = -1;
+    private double xl = -1;
+    private double yl = -1;
     private float scale = 200;
-    public final List<Point> renderPoints;
-    private final Function<Float, Float> func;
+    public final List<ColoredPoint> renderPoints;
+    private Segment highlight = null;
+    private final Function<Double, Double> main;
+    private Function<Double, Double> secondary;
 
-    private float xr() {
+    private double xr() {
         return xl + getWidth() / scale;
     }
 
-    private float yr() {
+    private double yr() {
         return yl + getHeight() / scale;
     }
 
-    public Graphic(ShapeRenderer renderer, Function<Float, Float> func) {
+    public Graphic(ShapeRenderer renderer,Function<Double, Double> main) {
         this.renderer = renderer;
-        this.func = func;
+        this.main = main;
         renderPoints = new ArrayList<>();
         super.addListener(new DragListener() {
             public void drag(InputEvent event, float x, float y, int pointer) {
@@ -45,45 +50,73 @@ public class Graphic extends Actor implements InputProcessor {
         });
     }
 
-    boolean between(float x1, float x2, float x3) {
+    private boolean between(double x1, double x2, double x3) {
         return x1 <= x2 && x2 <= x3;
     }
 
-    boolean betweenX(float x) {
+    private boolean betweenX(double x) {
         return between(xl, x, xr());
     }
 
-    boolean betweenY(float y) {
+    private boolean betweenY(double y) {
         return between(yl, y, yr());
     }
 
-    float toRealX(float x) {
-        return (x - xl) * scale + this.getX();
+    private float toRealX(double x) {
+        return (float) (x - xl) * scale + this.getX();
     }
 
-    float toRealY(float y) {
-        return (y - yl) * scale + this.getY();
+    private float toRealY(double y) {
+        return (float) (y - yl) * scale + this.getY();
     }
 
-    void drawPoint(float x, float y, float r) {
+    private void drawPoint(double x, double y, float r) {
         if (betweenX(x) && betweenY(y)) {
             renderer.circle(toRealX(x), toRealY(y), r);
         }
     }
 
-    void drawLine(float x1, float y1, float x2, float y2, float r) {
-        if (betweenX(x1) && betweenY(y1) && betweenX(x2) && betweenY(y2)) {
-            renderer.rectLine(toRealX(x1), toRealY(y1), toRealX(x2), toRealY(y2), r);
+    float normalize(float y) {
+        return (float) Math.min(Math.max(y, getY()), getHeight() + getY());
+    }
+
+    private void drawLine(double x1, double y1, double x2, double y2, float r) {
+        if (!(betweenX(x1) && betweenX(x2))) {
+            return;
+        }
+        if (betweenY(y1) || betweenY(y2)) {
+            renderer.rectLine(toRealX(x1), normalize(toRealY(y1)), toRealX(x2), normalize(toRealY(y2)), r);
+        } else if (between(y1, yl, y2) || between(y1, yr(), y2)) {
+            renderer.rectLine(toRealX(x1), normalize(toRealY(y1)), toRealX(x2), normalize(toRealY(y2)), r);
         }
     }
 
+    public void setHighlight(Segment highlight) {
+        this.highlight = highlight;
+    }
+
+    public void setSecondary(Function<Double, Double> secondary) {
+        this.secondary = secondary;
+    }
+
+    public void drawFunction(Function<Double, Double> func, Color highlightingColor, float width) {
+        if (func == null) {
+            return;
+        }
+        final double STEP = 0.1 / scale;
+        for (double i = xl; i <= xr(); i += STEP) {
+            if (highlight != null && between((float) highlight.getLeft(), i, (float) highlight.getRight())) {
+                renderer.setColor(highlightingColor);
+            }
+            drawLine(i, func.apply(i), i + STEP, func.apply(i + STEP), width);
+            renderer.setColor(Color.BLACK);
+        }
+    }
 
     @Override
     public void act(float time) {
-        final float STEP = 0.1f / scale;
-        for (float i = xl; i <= xr(); i += STEP) {
-            drawLine(i, func.apply(i), i + STEP, func.apply(i + STEP), 3);
-        }
+        drawFunction(main, Color.ORANGE, 3);
+        drawFunction(secondary, Color.BLACK, 2);
         drawLine(0, yl, 0, yr(), 2f);
         drawLine(xl, 0, xr(), 0, 2f);
         final float EPS = 0.02f;
@@ -93,7 +126,7 @@ public class Graphic extends Actor implements InputProcessor {
         for (float i = (float) Math.floor(yl); i <= yr(); ++i) {
             drawLine(-EPS, i, EPS, i, 1f);
         }
-        for (Point p : renderPoints) {
+        for (ColoredPoint p : renderPoints) {
             renderer.setColor(p.color);
             drawPoint(p.x, p.y, p.width);
         }
@@ -129,14 +162,13 @@ public class Graphic extends Actor implements InputProcessor {
         return false;
     }
 
-    private float unrealX(float x) {
+    private double unrealX(float x) {
         return (x - getX()) / scale + xl;
     }
 
-    private float unrealY(float y) {
+    private double unrealY(float y) {
         return (y - getY()) / scale + yl;
     }
-
 
     private float lastX;
     private float lastY;
@@ -154,7 +186,7 @@ public class Graphic extends Actor implements InputProcessor {
             scale += h;
         } else {
             scale -= 10;
-            scale = Math.max(scale, 1);
+            scale = Math.max(scale, 50);
         }
         return true;
     }

@@ -1,21 +1,26 @@
 package com.mygdx.methods;
 
+import org.lwjgl.Sys;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
-public class ParabolaMethod extends AbstractAlgorithm {
-    ParabolaMethod(Function<Double, Double> func) {
-        super(func);
-    }
+public class ParabolaMethod extends AbstractDrawableMethod {
 
-    private double function(double value) {
-        return value - Math.log(value);
+    private final List<Function<Double, Double>> renderFunctions = new ArrayList<>();
+    private final Function<Double, Double> realFunction;
+
+    public ParabolaMethod(Function<Double, Double> func) {
+        super(func);
+        this.realFunction = func;
     }
 
     private double getValidMiddlePoint(double left, double right) {
         double m = (right + left) / 2;
-        double fm = function(m);
-        double fl = function(left);
-        double fr = function(right);
+        double fm = realFunction.apply(m);
+        double fl = realFunction.apply(left);
+        double fr = realFunction.apply(right);
         while (!(fl >= fm && fm <= fr)) {
             if (fl < fm) {
                 right = m;
@@ -24,21 +29,34 @@ public class ParabolaMethod extends AbstractAlgorithm {
                 left = m;
             }
             m = (right + left) / 2;
-            fl = function(left);
-            fr = function(right);
-            fm = function(m);
+            fl = realFunction.apply(left);
+            fr = realFunction.apply(right);
+            fm = realFunction.apply(m);
         }
         return m;
     }
 
     @Override
     public double findMin(double left, double right, double eps) {
+        clear();
         double m = getValidMiddlePoint(left, right);
         double fm = func.apply(m);
         double fl = func.apply(left);
         double fr = func.apply(right);
         while (right - left > eps) {
             double x = (left + m - (((fm - fl) * (right - m)) / (m - left)) / ((fr - fl) / (right - left) - (fm - fl) / (m - left))) / 2;
+            addSegment(left, right);
+            double finalFm = fm;
+            double finalFl = fl;
+            double finalM = m;
+            double finalLeft = left;
+            double finalRight = right;
+            double finalFr = fr;
+            renderFunctions.add(t -> {
+                double a1 = (finalFm - finalFl) / (finalM - finalLeft);
+                double a2 = 1 / (finalRight - finalM) * ((finalFr - finalFl) / (finalRight - finalLeft) - (finalFl - finalFm) / (finalM - finalLeft));
+                return finalFl + a1 * (t - finalLeft) + a2 * (t - finalLeft) * (t - finalM);
+            });
             double fx = func.apply(x);
             if (fx > fm) {
                 if (x > m) {
@@ -61,5 +79,10 @@ public class ParabolaMethod extends AbstractAlgorithm {
             }
         }
         return m;
+    }
+
+    @Override
+    public List<Function<Double, Double>> renderFunctions() {
+        return renderFunctions;
     }
 }
