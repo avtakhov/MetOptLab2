@@ -3,19 +3,24 @@ package com.mygdx.methods;
 import java.util.function.Function;
 
 public class ParabolaMethod extends AbstractAlgorithm {
-    ParabolaMethod(Function<Double, Double> func) {
-        super(func);
+
+    Function<Double, Double> baseFunc;
+
+    public ParabolaMethod(Function<Double, Double> drawFunc, Function<Double, Double> baseFunc) {
+        super(drawFunc);
+        this.baseFunc = baseFunc;
     }
 
-    private double function(double value) {
-        return value - Math.log(value);
-    }
-
+    /**
+     * Выбор средней точки x2, удовлетворяющей условиям
+     * x1 < x2 < x3 && f(x1) >= f(x2) <= f(x3)
+     */
     private double getValidMiddlePoint(double left, double right) {
+        assert baseFunc != null;
         double m = (right + left) / 2;
-        double fm = function(m);
-        double fl = function(left);
-        double fr = function(right);
+        double fm = baseFunc.apply(m);
+        double fl = baseFunc.apply(left);
+        double fr = baseFunc.apply(right);
         while (!(fl >= fm && fm <= fr)) {
             if (fl < fm) {
                 right = m;
@@ -24,22 +29,25 @@ public class ParabolaMethod extends AbstractAlgorithm {
                 left = m;
             }
             m = (right + left) / 2;
-            fl = function(left);
-            fr = function(right);
-            fm = function(m);
+            fl = baseFunc.apply(left);
+            fr = baseFunc.apply(right);
+            fm = baseFunc.apply(m);
         }
         return m;
     }
 
+    /**
+     * Реализация нахождения минимума для метода парабол
+     */
     @Override
     public double findMin(double left, double right, double eps) {
         double m = getValidMiddlePoint(left, right);
-        double fm = func.apply(m);
-        double fl = func.apply(left);
-        double fr = func.apply(right);
+        double fm = drawFunc.apply(m);
+        double fl = drawFunc.apply(left);
+        double fr = drawFunc.apply(right);
         while (right - left > eps) {
             double x = (left + m - (((fm - fl) * (right - m)) / (m - left)) / ((fr - fl) / (right - left) - (fm - fl) / (m - left))) / 2;
-            double fx = func.apply(x);
+            double fx = drawFunc.apply(x);
             if (fx > fm) {
                 if (x > m) {
                     right = x;

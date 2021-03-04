@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
 
-public class BrentCombMethod extends AbstractAlgorithm implements Method {
+public class BrentCombMethod extends AbstractAlgorithm {
 
     private final static double K = (3 - Math.sqrt(5)) / 2;
 
@@ -16,12 +16,14 @@ public class BrentCombMethod extends AbstractAlgorithm implements Method {
         return Arrays.stream(os).distinct().count() == os.length;
     }
 
+    /**
+     * Реализация нахождения минимума для комбинированного метода Брента
+     */
     public double findMin(double left, double right, double eps) {
         double d = right - left, pd = d;
         double x = left + K * d, px = x, ppx = x;
-        double fx = func.apply(x), fpx = fx, fppx = fx;
+        double fx = drawFunc.apply(x), fpx = fx, fppx = fx;
         double u = 0, fu;
-        // u = 0.0 костыль для компилятора
         while ((right - left) / 2 > eps) {
             double ppd = pd;
             pd = d;
@@ -62,7 +64,7 @@ public class BrentCombMethod extends AbstractAlgorithm implements Method {
                 u = x + Math.signum(u - x) * tol;
             }
             d = Math.abs(u-x);
-            fu = func.apply(u);
+            fu = drawFunc.apply(u);
 
             if (fu <= fx) {
                 if (u >= x) {

@@ -15,9 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.methods.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class GraphicEngine extends ApplicationAdapter {
@@ -40,9 +39,9 @@ public class GraphicEngine extends ApplicationAdapter {
 
         @Override
         public Double apply(Double x) {
-            count++;
             Double fx = func.apply(x);
-            graphic.renderPoints.add(new Point(x.floatValue(), fx.floatValue(), new Color((float) Math.log(count) / 3.5f, 0,0,1)));
+            count++;
+            graphic.renderPoints.add(new Point(x.floatValue(), fx.floatValue(), new Color((float) Math.log(count) / 3.5f, 0, 0, 1)));
             return fx;
         }
     }
@@ -68,7 +67,13 @@ public class GraphicEngine extends ApplicationAdapter {
         int coef = 0;
         float xCoord = 1200f;
         float yCoord = 800f;
-        for (Method m : Algorithms.methodList(func)) {
+        Method[] methodList = new Method[]{
+                new DichotomyMethod(func, 1e-3),
+                new GoldenSectionMethod(func),
+                new FibonacciMethod(func),
+                new ParabolaMethod(func, target),
+                new BrentCombMethod(func)};
+        for (Method m : methodList) {
             System.out.println(index + " " + coef);
             Button b = new ImageButton(textures.get(index));
             if (index % 3 == 0) {
