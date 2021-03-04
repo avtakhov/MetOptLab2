@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
 
-public class BrentCombMethod extends AbstractAlgorithm {
+public class BrentCombMethod extends AbstractDrawableMethod implements Method {
 
     private final static double K = (3 - Math.sqrt(5)) / 2;
 
@@ -16,33 +16,34 @@ public class BrentCombMethod extends AbstractAlgorithm {
         return Arrays.stream(os).distinct().count() == os.length;
     }
 
-    /**
-     * Реализация нахождения минимума для комбинированного метода Брента
-     */
+    private static double sqr(double x) {
+        return x * x;
+    }
+
     public double findMin(double left, double right, double eps) {
+        clear();
         double d = right - left, pd = d;
         double x = left + K * d, px = x, ppx = x;
-        double fx = drawFunc.apply(x), fpx = fx, fppx = fx;
+        double fx = func.apply(x), fpx = fx, fppx = fx;
         double u = 0, fu;
         while ((right - left) / 2 > eps) {
+            addSegment(left, right);
             double ppd = pd;
             pd = d;
             double tol = eps * Math.abs(x) + eps / 10;
-            if (Math.abs(x - (left + right) / 2)   +   (right - left) / 2   <=   2 * tol) {
+            if (Math.abs(x - (left + right) / 2) + (right - left) / 2 <= 2 * tol) {
                 break;
             }
-
             boolean acceptedParabola = false;
             if (allDistinct(x, px, ppx) && allDistinct(fx, fpx, fppx)) {
                 assert px < x && x < ppx;
-                double[][] a = {{x,fx}, {px, fpx}, {ppx, fppx}};
-                Arrays.sort(a, new Comparator<double[]>() {
-                    public int compare(double[] x, double[] y) {
-                        return Double.compare(x[0], y[0]);
-                    }
-                });
+                double[][] a = {{x, fx}, {px, fpx}, {ppx, fppx}};
+                Arrays.sort(a, (p, q) -> Double.compare(p[0], q[0]));
 
-                u = a[1][0] - ( Math.pow((a[1][0] - a[0][0]), 2) * (a[1][1] - a[2][1])  -  Math.pow((a[1][0] - a[2][0]), 2) * (a[1][1] - a[0][1])  ) / 2 / (        (a[1][0] - a[0][0]) * (a[1][1] - a[2][1])  -  (a[1][0] - a[2][0]) * (a[1][1] - a[0][1])    );
+                u = a[1][0] -
+                        (sqr(a[1][0] - a[0][0]) * (a[1][1] - a[2][1]) - sqr(a[1][0] - a[2][0]) * (a[1][1] - a[0][1]))
+                                / 2
+                                / ((a[1][0] - a[0][0]) * (a[1][1] - a[2][1]) - (a[1][0] - a[2][0]) * (a[1][1] - a[0][1]));
 
                 if (left <= u && u <= right && Math.abs(u - x) < ppd / 2) {
                     acceptedParabola = true;
@@ -63,8 +64,8 @@ public class BrentCombMethod extends AbstractAlgorithm {
             if (Math.abs(u - x) < tol) {
                 u = x + Math.signum(u - x) * tol;
             }
-            d = Math.abs(u-x);
-            fu = drawFunc.apply(u);
+            d = Math.abs(u - x);
+            fu = func.apply(u);
 
             if (fu <= fx) {
                 if (u >= x) {

@@ -2,7 +2,7 @@ package com.mygdx.methods;
 
 import java.util.function.Function;
 
-public class GoldenSectionMethod extends AbstractAlgorithm {
+public class GoldenSectionMethod extends AbstractDrawableMethod {
 
     final double TAU = (Math.sqrt(5) - 1) / 2;
 
@@ -15,12 +15,14 @@ public class GoldenSectionMethod extends AbstractAlgorithm {
      */
     @Override
     public double findMin(double left, double right, double eps) {
+        clear();
         double x1 = left + ((3 - Math.sqrt(5)) / 2 * (right - left));
         double x2 = left + ((Math.sqrt(5) - 1) / 2 * (right - left));
         double fx1 = drawFunc.apply(x1);
         double fx2 = drawFunc.apply(x2);
         double curEps = (right - left) / 2;
         while (curEps > eps) {
+            addSegment(left, right);
             if (fx1 < fx2) {
                 right = x2;
                 x2 = x1;
