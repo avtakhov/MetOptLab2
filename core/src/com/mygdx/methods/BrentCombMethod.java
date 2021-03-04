@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
 
-public class BrentCombMethod extends AbstractDrawableMethod implements Method {
+public class BrentCombMethod extends AbstractDrawableMethod {
 
     private final static double K = (3 - Math.sqrt(5)) / 2;
 

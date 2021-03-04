@@ -16,6 +16,10 @@ public class ParabolaMethod extends AbstractDrawableMethod {
         this.realFunction = func;
     }
 
+    /**
+     * Выбор средней точки x2, удовлетворяющей условиям
+     * x1 < x2 < x3 && f(x1) >= f(x2) <= f(x3)
+     */
     private double getValidMiddlePoint(double left, double right) {
         double m = (right + left) / 2;
         double fm = realFunction.apply(m);
@@ -36,13 +40,17 @@ public class ParabolaMethod extends AbstractDrawableMethod {
         return m;
     }
 
+    /**
+     * Реализация нахождения минимума для метода парабол
+     */
     @Override
     public double findMin(double left, double right, double eps) {
         clear();
         double m = getValidMiddlePoint(left, right);
         double fm = func.apply(m);
-        double fl = func.apply(left);
-        double fr = func.apply(right);
+        double fl = realFunction.apply(left);
+        double fr = realFunction.apply(right);
+        renderFunctions.clear();
         while (right - left > eps) {
             double x = (left + m - (((fm - fl) * (right - m)) / (m - left)) / ((fr - fl) / (right - left) - (fm - fl) / (m - left))) / 2;
             addSegment(left, right);

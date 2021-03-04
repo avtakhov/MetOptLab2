@@ -10,6 +10,9 @@ public abstract class AbstractDrawableMethod implements DrawableMethod {
     private final List<Segment> renderSegments = new ArrayList<>();
     private final List<Point> renderPoints = new ArrayList<>();
 
+    /**
+     * Добавление возможности отметки точек текущего решения одновременно с подсчетом функции
+     */
     private class PointFunctions implements Function<Double, Double> {
         public final Function<Double, Double> func;
 
@@ -25,16 +28,15 @@ public abstract class AbstractDrawableMethod implements DrawableMethod {
         }
     }
 
+    /**
+     * Принимает и инициализирует функцию, для которой будет применяться поиск
+     */
     AbstractDrawableMethod(Function<Double, Double> func) {
         this.func = new PointFunctions(func);
     }
 
     protected void addSegment(double l, double r) {
         renderSegments.add(new Segment(l, r));
-    }
-
-    protected void addPoint(double x, double y) {
-        renderPoints.add(new Point((float) x, (float) y));
     }
 
     protected void clear() {

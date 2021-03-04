@@ -88,8 +88,8 @@ public class GraphicEngine extends ApplicationAdapter {
             stage.addActor(b);
 
         // slider
-        sliderBackgroundTex = new Texture(Gdx.files.internal("sources/slider_background.png"));
-        sliderKnobTex = new Texture(Gdx.files.internal("sources/slider_knob.png"));
+        sliderBackgroundTex = new Texture(Gdx.files.internal("slider_background.png"));
+        sliderKnobTex = new Texture(Gdx.files.internal("slider_knob.png"));
         Slider.SliderStyle ss = new Slider.SliderStyle();
         ss.background = new TextureRegionDrawable(new TextureRegion(sliderBackgroundTex));
         ss.knob = new TextureRegionDrawable(new TextureRegion(sliderKnobTex));
