@@ -22,83 +22,99 @@ public class BrentCombMethod extends AbstractDrawableMethod {
 
     public double findMin(double left, double right, double eps) {
         clear();
-        double d = right - left, pd = d;
-        double x = left + K * d, px = x, ppx = x;
-        double fx = callFun(x), fpx = fx, fppx = fx;
-        double u = 0, fu;
+        // x - текущий минимум
+        // w - второй минимум
+        // v - предыдущее значение w (третий минимум, если w != v)
+        // u - последняя вычисленная точка
+        // d - смещение на предыдущем шаге
+        // pd - предыдущее значение d
+        // m - середина интервала
+        double x = left + K * (right-left), w = x, v = x;
+        double fx = func.apply(x), fv = fx, fw = fx, fu;
+        double d = 0, pd = d;
+        double m, tol, u;
+        tol = Math.abs(x) * eps + eps / 10;
         while ((right - left) / 2 > eps) {
             addSegment(left, right);
-            double ppd = pd;
-            pd = d;
-            double tol = eps * Math.abs(x) + eps / 10;
-            if (Math.abs(x - (left + right) / 2) + (right - left) / 2 <= 2 * tol) {
+            m = (left + right) / 2;
+            // критерий останова
+            if (Math.abs(x - m) + (right - left) / 2 <= 2 * tol) {
                 break;
             }
-            boolean acceptedParabola = false;
-            if (allDistinct(x, px, ppx) && allDistinct(fx, fpx, fppx)) {
-                assert px < x && x < ppx;
-                double[][] a = {{x, fx}, {px, fpx}, {ppx, fppx}};
-                Arrays.sort(a, (p, q) -> Double.compare(p[0], q[0]));
 
-                u = a[1][0] -
-                        (sqr(a[1][0] - a[0][0]) * (a[1][1] - a[2][1]) - sqr(a[1][0] - a[2][0]) * (a[1][1] - a[0][1]))
-                                / 2
-                                / ((a[1][0] - a[0][0]) * (a[1][1] - a[2][1]) - (a[1][0] - a[2][0]) * (a[1][1] - a[0][1]));
-
-                if (left <= u && u <= right && Math.abs(u - x) < ppd / 2) {
-                    acceptedParabola = true;
-                    if (u - left < 2 * tol || right - u < 2 * tol) {
-                        u = x - Math.signum(x - (left + right) / 2) * tol;
-                    }
-                }
-            }
-            if (!acceptedParabola) {
-                if (x < (left + right) / 2) {
-                    u = x + K * (right - x);
-                    pd = right - x;
+            if (allDistinct(x, w, v) && allDistinct(fx, fw, fv)) {
+                // вычисляем параболу
+                double r = (x-w) * (fx - fv);
+                double q = (x-v) * (fx - fw);
+                double p = (x-v) * q - (x - w) * r;
+                q = 2 * (q-r);
+                if (q > 0) {
+                    p = -p;
                 } else {
-                    u = x - K * (right - x);
-                    pd = x - left;
+                    q = -q;
                 }
+
+                double td = pd;
+                pd = d;
+
+                if ((Math.abs(p) >= Math.abs(q * td / 2)) || (p <= q * (left - x)) || (p >= q * (right - x))) {
+                    // friendship ended with parabola
+                    // now golden section is my best friend
+                    pd = x >= m ? left - x : right - x;
+                    d = K * pd;
+                } else {
+                    // оо повезло повезло
+                    // обмазываемся параболой
+                    d = p / q;
+                    u = x + d;
+                }
+            } else {
+                // золотое сечение без лишнего выпендрёжа
+                pd = x >= m ? left - x : right - x;
+                d = K * pd;
             }
-            if (Math.abs(u - x) < tol) {
-                u = x + Math.signum(u - x) * tol;
-            }
-            d = Math.abs(u - x);
-            fu = callFun(u);
+
+            u = x + d;
+            fu = func.apply(u);
 
             if (fu <= fx) {
+                // точка настоящий classic, я бы даже сказал pleasantly
                 if (u >= x) {
                     left = x;
                 } else {
                     right = x;
                 }
-                ppx = px;
-                px = x;
+                v = w;
+                w = x;
                 x = u;
-                fppx = fpx;
-                fpx = fx;
+                fv = fw;
+                fw = fx;
                 fx = fu;
             } else {
-                if (u >= x) {
-                    right = u;
-                } else {
-                    left = u;
+                if (fu <= fw || w == x) {
+                    // если точка лучше w (вторая лучшая)
+                    v = w;
+                    w = u;
+                    fv = fw;
+                    fw = fu;
+                } else if (fu <= fv || v == x || v == w) {
+                    // если точка лучше v (третья лучшая)
+                    v = u;
+                    fv = fu;
                 }
-                if (fu <= fpx || px == x) {
-                    ppx = px;
-                    px = u;
-                    fppx = fpx;
-                    fpx = fu;
-                } else if (fu <= fppx || ppx == x || ppx == px) {
-                    ppx = u;
-                    fppx = fu;
+                // точка помойка, но хотя бы лучше чем границы интервала
+                if (u < x) {
+                    left = u;
+                } else {
+                    right = u;
                 }
             }
 
+
         }
 
-        return (left + right) / 2;
+
+        return (right + left) / 2;
     }
 
 }

@@ -18,7 +18,7 @@ public class DichotomyMethod extends AbstractDrawableMethod {
             addSegment(left, right);
             double x1 = ((left + right) - delta) / 2;
             double x2 = ((left + right) + delta) / 2;
-            if (callFun(x1) < callFun(x2)) {
+            if (func.apply(x1) < func.apply(x2)) {
                 right = x2;
             } else {
                 left = x1;
