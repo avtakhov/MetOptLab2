@@ -22,9 +22,12 @@ public class ParabolaMethod extends AbstractDrawableMethod {
      */
     private double getValidMiddlePoint(double left, double right) {
         double m = (right + left) / 2;
-        double fm = realFunction.apply(m);
-        double fl = realFunction.apply(left);
-        double fr = realFunction.apply(right);
+//        double fm = realFunction.apply(m);
+//        double fl = realFunction.apply(left);
+//        double fr = realFunction.apply(right);
+        double fm = callFun(m);
+        double fl = callFun(left);
+        double fr = callFun(right);
         while (!(fl >= fm && fm <= fr)) {
             if (fl < fm) {
                 right = m;
@@ -33,9 +36,12 @@ public class ParabolaMethod extends AbstractDrawableMethod {
                 left = m;
             }
             m = (right + left) / 2;
-            fl = realFunction.apply(left);
-            fr = realFunction.apply(right);
-            fm = realFunction.apply(m);
+//            fl = realFunction.apply(left);
+//            fr = realFunction.apply(right);
+//            fm = realFunction.apply(m);
+            fm = callFun(m);
+            fl = callFun(left);
+            fr = callFun(right);
         }
         return m;
     }
@@ -48,8 +54,10 @@ public class ParabolaMethod extends AbstractDrawableMethod {
         clear();
         double m = getValidMiddlePoint(left, right);
         double fm = func.apply(m);
-        double fl = realFunction.apply(left);
-        double fr = realFunction.apply(right);
+//        double fl = realFunction.apply(left);
+//        double fr = realFunction.apply(right);
+        double fl = callFun(left);
+        double fr = callFun(right);
         renderFunctions.clear();
         while (right - left > eps) {
             double x = (left + m - (((fm - fl) * (right - m)) / (m - left)) / ((fr - fl) / (right - left) - (fm - fl) / (m - left))) / 2;
@@ -65,7 +73,8 @@ public class ParabolaMethod extends AbstractDrawableMethod {
                 double a2 = 1 / (finalRight - finalM) * ((finalFr - finalFl) / (finalRight - finalLeft) - (finalFl - finalFm) / (finalM - finalLeft));
                 return finalFl + a1 * (t - finalLeft) + a2 * (t - finalLeft) * (t - finalM);
             });
-            double fx = func.apply(x);
+//            double fx = func.apply(x);
+            double fx = callFun(x);
             if (fx > fm) {
                 if (x > m) {
                     right = x;

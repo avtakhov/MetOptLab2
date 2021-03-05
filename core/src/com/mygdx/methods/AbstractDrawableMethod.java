@@ -9,6 +9,7 @@ public abstract class AbstractDrawableMethod implements DrawableMethod {
     protected final Function<Double, Double> func;
     private final List<Segment> renderSegments = new ArrayList<>();
     private final List<Point> renderPoints = new ArrayList<>();
+    private int funCalls;
 
     /**
      * Добавление возможности отметки точек текущего решения одновременно с подсчетом функции
@@ -58,4 +59,19 @@ public abstract class AbstractDrawableMethod implements DrawableMethod {
     public List<Point> renderPoints() {
         return renderPoints;
     }
+
+    @Override
+    public int getFunCalls() {
+        return funCalls;
+    }
+
+    public void resetFunCalls() {
+        funCalls = 0;
+    }
+
+    protected double callFun(double arg) {
+        funCalls++;
+        return func.apply(arg);
+    }
+
 }

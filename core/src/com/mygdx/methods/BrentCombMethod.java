@@ -24,7 +24,7 @@ public class BrentCombMethod extends AbstractDrawableMethod {
         clear();
         double d = right - left, pd = d;
         double x = left + K * d, px = x, ppx = x;
-        double fx = func.apply(x), fpx = fx, fppx = fx;
+        double fx = callFun(x), fpx = fx, fppx = fx;
         double u = 0, fu;
         while ((right - left) / 2 > eps) {
             addSegment(left, right);
@@ -65,7 +65,7 @@ public class BrentCombMethod extends AbstractDrawableMethod {
                 u = x + Math.signum(u - x) * tol;
             }
             d = Math.abs(u - x);
-            fu = func.apply(u);
+            fu = callFun(u);
 
             if (fu <= fx) {
                 if (u >= x) {
