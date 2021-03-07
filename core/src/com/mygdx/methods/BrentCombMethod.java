@@ -1,7 +1,6 @@
 package com.mygdx.methods;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.function.Function;
 
 public class BrentCombMethod extends AbstractDrawableMethod {
@@ -30,10 +29,11 @@ public class BrentCombMethod extends AbstractDrawableMethod {
         // pd - предыдущее значение d
         // m - середина интервала
         double x = left + K * (right-left), w = x, v = x;
-        double fx = func.apply(x), fv = fx, fw = fx, fu;
+        double fx = callFun(x), fv = fx, fw = fx, fu;
         double d = 0, pd = d;
         double m, tol, u;
         tol = Math.abs(x) * eps + eps / 10;
+        log(left + " " + right);
         while ((right - left) / 2 > eps) {
             addSegment(left, right);
             m = (left + right) / 2;
@@ -75,7 +75,7 @@ public class BrentCombMethod extends AbstractDrawableMethod {
             }
 
             u = x + d;
-            fu = func.apply(u);
+            fu = callFun(u);
 
             if (fu <= fx) {
                 // точка настоящий classic, я бы даже сказал pleasantly
@@ -110,7 +110,7 @@ public class BrentCombMethod extends AbstractDrawableMethod {
                 }
             }
 
-
+            log(left + " " + right);
         }
 
 

@@ -71,7 +71,10 @@ public class GraphicEngine extends ApplicationAdapter {
                     graphic.renderPoints.clear();
                     graphic.setSecondary(null);
                     AbstractDrawableMethod method = methods.get(b);
+
+                    method.resetFunCalls();
                     method.findMin(0.5, 4, 1e-3);
+                    System.out.println(method.getFunCalls());
                     processSegments = method.renderSegments();
                     processFunctions = method.renderFunctions();
                     List<Point> points = method.renderPoints();

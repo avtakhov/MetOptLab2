@@ -25,8 +25,9 @@ public class FibonacciMethod extends AbstractDrawableMethod {
         }
         double x2 = left + (right - left) * fibPrevious / fibCurrent;
         double x1 = left + (right - x2);
-        double fx1 = func.apply(x1);
-        double fx2 = func.apply(x2);
+        double fx1 = callFun(x1);
+        double fx2 = callFun(x2);
+        log(left + " " + right);
         while (n > 0) {
             addSegment(left, right);
             n--;
@@ -35,14 +36,16 @@ public class FibonacciMethod extends AbstractDrawableMethod {
                 x2 = x1;
                 fx2 = fx1;
                 x1 = left + (right - x2);
-                fx1 = func.apply(x1);
+                fx1 = callFun(x1);
             } else {
                 left = x1;
                 x1 = x2;
                 fx1 = fx2;
                 x2 = right - (x1 - left);
-                fx2 = func.apply(x2);
+                fx2 = callFun(x2);
             }
+            log(left + " " + right);
+
         }
         return (left + right) / 2;
     }

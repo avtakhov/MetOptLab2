@@ -9,33 +9,13 @@ public abstract class AbstractDrawableMethod implements DrawableMethod {
     protected final Function<Double, Double> func;
     private final List<Segment> renderSegments = new ArrayList<>();
     private final List<Point> renderPoints = new ArrayList<>();
+    private int funCalls;
+    private boolean log;
 
-    /**
-     * Добавление возможности отметки точек текущего решения одновременно с подсчетом функции
-     */
-    private class PointFunctions implements Function<Double, Double> {
-        public final Function<Double, Double> func;
-
-        PointFunctions(Function<Double, Double> func) {
-            this.func = func;
-        }
-
-        @Override
-        public Double apply(Double x) {
-            Double y = this.func.apply(x);
-            renderPoints.add(new Point(x.floatValue(), y.floatValue()));
-            return y;
-        }
-    }
-
-    /**
-     * Принимает и инициализирует функцию, для которой будет применяться поиск
-     */
     AbstractDrawableMethod(Function<Double, Double> func) {
-        this.func = new PointFunctions(func);
-//        this.func = func;
+        this.func = func;
+        log = true;
     }
-
 
     protected void addSegment(double l, double r) {
         renderSegments.add(new Segment(l, r));
@@ -61,5 +41,35 @@ public abstract class AbstractDrawableMethod implements DrawableMethod {
         return renderPoints;
     }
 
+    public double callFun(Double arg) {
+        return callFun(arg, true);
+    }
+
+    public double callFun(Double arg, boolean draw) {
+        Double y = this.func.apply(arg);
+        if (draw) {
+            renderPoints.add(new Point(arg.floatValue(), y.floatValue()));
+        }
+        funCalls++;
+        return y;
+    }
+
+    public int getFunCalls() {
+        return funCalls;
+    }
+
+    public void resetFunCalls() {
+        funCalls = 0;
+    }
+
+    public void log(String msg) {
+        if (log) {
+            System.out.println(msg);
+        }
+    }
+
+    public void setLog(boolean log) {
+        this.log = log;
+    }
 
 }

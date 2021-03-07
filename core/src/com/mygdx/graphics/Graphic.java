@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
-import com.mygdx.methods.Point;
 import com.mygdx.methods.Segment;
 
 import java.util.ArrayList;
