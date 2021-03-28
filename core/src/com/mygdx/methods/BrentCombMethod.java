@@ -112,6 +112,7 @@ public class BrentCombMethod extends AbstractDrawableMethod {
 
             log(left + " " + right);
         }
+        addSegment(left, right);
 
 
         return (right + left) / 2;
