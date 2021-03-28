@@ -64,7 +64,7 @@ public class ParabolaMethod extends AbstractDrawableMethod {
             double finalFr = fr;
             renderFunctions.add(t -> {
                 double a1 = (finalFm - finalFl) / (finalM - finalLeft);
-                double a2 = 1 / (finalRight - finalM) * ((finalFr - finalFl) / (finalRight - finalLeft) - (finalFl - finalFm) / (finalM - finalLeft));
+                double a2 = 1 / (finalRight - finalM) * ((finalFr - finalFl) / (finalRight - finalLeft) - (finalFm - finalFl) / (finalM - finalLeft));
                 return finalFl + a1 * (t - finalLeft) + a2 * (t - finalLeft) * (t - finalM);
             });
             double fx = callFun(x);
@@ -89,6 +89,7 @@ public class ParabolaMethod extends AbstractDrawableMethod {
             }
             log(left + " " + right);
         }
+        addSegment(left, right);
         return m;
     }
 }
