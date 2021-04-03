@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
-import com.mygdx.methods.Segment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,6 @@ public class Graphic extends Actor implements InputProcessor {
     private double yl = -1;
     private float scale = 200;
     public final List<ColoredPoint> renderPoints;
-    private Segment highlight = null;
     private final Function<Double, Double> main;
     private Function<Double, Double> secondary;
 
@@ -90,23 +88,16 @@ public class Graphic extends Actor implements InputProcessor {
         }
     }
 
-    public void setHighlight(Segment highlight) {
-        this.highlight = highlight;
-    }
-
     public void setSecondary(Function<Double, Double> secondary) {
         this.secondary = secondary;
     }
 
-    public void drawFunction(Function<Double, Double> func, Color highlightingColor, float width) {
+    public void drawFunction(Function<Double, Double> func, float width) {
         if (func == null) {
             return;
         }
         final double STEP = 0.1 / scale;
         for (double i = xl; i <= xr(); i += STEP) {
-            if (highlight != null && between((float) highlight.getLeft(), i, (float) highlight.getRight())) {
-                renderer.setColor(highlightingColor);
-            }
             drawLine(i, func.apply(i), i + STEP, func.apply(i + STEP), width);
             renderer.setColor(Color.BLACK);
         }
@@ -114,8 +105,8 @@ public class Graphic extends Actor implements InputProcessor {
 
     @Override
     public void act(float time) {
-        drawFunction(main, Color.ORANGE, 3);
-        drawFunction(secondary, Color.BLACK, 2);
+        drawFunction(main, 3);
+        drawFunction(secondary, 2);
         drawLine(0, yl, 0, yr(), 2f);
         drawLine(xl, 0, xr(), 0, 2f);
         final float EPS = 0.02f;

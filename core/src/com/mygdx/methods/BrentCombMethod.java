@@ -1,5 +1,7 @@
 package com.mygdx.methods;
 
+import com.mygdx.nmethods.Value;
+
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -15,12 +17,7 @@ public class BrentCombMethod extends AbstractDrawableMethod {
         return Arrays.stream(os).distinct().count() == os.length;
     }
 
-    private static double sqr(double x) {
-        return x * x;
-    }
-
     public double findMin(double left, double right, double eps) {
-        clear();
         // x - текущий минимум
         // w - второй минимум
         // v - предыдущее значение w (третий минимум, если w != v)
@@ -29,13 +26,11 @@ public class BrentCombMethod extends AbstractDrawableMethod {
         // pd - предыдущее значение d
         // m - середина интервала
         double x = left + K * (right-left), w = x, v = x;
-        double fx = callFun(x), fv = fx, fw = fx, fu;
+        double fx = func.apply(x), fv = fx, fw = fx, fu;
         double d = 0, pd = d;
         double m, tol, u;
         tol = Math.abs(x) * eps + eps / 10;
-        log(left + " " + right);
         while ((right - left) / 2 > eps) {
-            addSegment(left, right);
             m = (left + right) / 2;
             // критерий останова
             if (Math.abs(x - m) + (right - left) / 2 <= 2 * tol) {
@@ -66,7 +61,6 @@ public class BrentCombMethod extends AbstractDrawableMethod {
                     // оо повезло повезло
                     // обмазываемся параболой
                     d = p / q;
-                    u = x + d;
                 }
             } else {
                 // золотое сечение без лишнего выпендрёжа
@@ -75,7 +69,7 @@ public class BrentCombMethod extends AbstractDrawableMethod {
             }
 
             u = x + d;
-            fu = callFun(u);
+            fu = func.apply(u);
 
             if (fu <= fx) {
                 // точка настоящий classic, я бы даже сказал pleasantly
@@ -109,11 +103,7 @@ public class BrentCombMethod extends AbstractDrawableMethod {
                     right = u;
                 }
             }
-
-            log(left + " " + right);
         }
-        addSegment(left, right);
-
 
         return (right + left) / 2;
     }

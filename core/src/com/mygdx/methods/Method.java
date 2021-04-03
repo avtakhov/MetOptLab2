@@ -7,7 +7,4 @@ public interface Method {
      * Возвращает найденный в зависимости от eps минимум
      */
     double findMin(double left, double right, double eps);
-    int getFunCalls();
-    void resetFunCalls();
-    void setLog(boolean log);
 }
