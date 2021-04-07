@@ -38,7 +38,7 @@ public class QuadraticFunction implements Function<Vector, Double> {
     }
 
     public Vector gradient(Vector point) {
-        return MatrixAlgebra.sum(MatrixAlgebra.multiply(a, point), b);
+        return a.multiply(point).sum(b);
     }
 
 }

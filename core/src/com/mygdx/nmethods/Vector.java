@@ -1,5 +1,6 @@
 package com.mygdx.nmethods;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -11,12 +12,38 @@ public class Vector extends AbstractList<Double> {
         this.coordinates = coordinates;
     }
 
+    public Vector() {
+        this(new ArrayList<>());
+    }
+
+    public double scalarProduct(final List<Double> other) {
+        double result = 0;
+        for (int i = 0; i < other.size(); i++) {
+            result += this.coordinates.get(i) * other.get(i);
+        }
+        return result;
+    }
+
+    public Vector multiply(final double scalar) {
+        return this.stream()
+                .map(x -> x * scalar)
+                .collect(Collectors.toCollection(Vector::new));
+    }
+
+    public Vector sum(List<Double> other) {
+        Vector result = new Vector();
+        for (int i = 0; i < other.size(); i++) {
+            result.add(this.coordinates.get(i) + other.get(i));
+        }
+        return result;
+    }
+
     @Override
     public Double get(final int index) {
         return coordinates.get(index);
     }
 
-    public double dist() {
+    public double length() {
         return Math.sqrt(coordinates.stream().reduce(0.0, (x, y) -> x + y * y));
     }
 
@@ -25,7 +52,8 @@ public class Vector extends AbstractList<Double> {
         return coordinates.size();
     }
 
-    Vector force() {
-        return new Vector(new ArrayList<>(coordinates));
+    @Override
+    public boolean add(final Double elem) {
+        return this.coordinates.add(elem);
     }
 }
