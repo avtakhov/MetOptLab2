@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
+import com.mygdx.nmethods.QuadraticFunction;
+import com.mygdx.nmethods.Value;
+import com.mygdx.nmethods.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +19,7 @@ public class Graphic extends Actor implements InputProcessor {
     private double xl = -1;
     private double yl = -1;
     private float scale = 200;
-    public final List<ColoredPoint> renderPoints;
-    private final Function<Double, Double> main;
-    private Function<Double, Double> secondary;
+    private final RenderFunction main;
 
     private double xr() {
         return xl + getWidth() / scale;
@@ -28,10 +29,12 @@ public class Graphic extends Actor implements InputProcessor {
         return yl + getHeight() / scale;
     }
 
-    public Graphic(ShapeRenderer renderer,Function<Double, Double> main) {
+    public Graphic(ShapeRenderer renderer, RenderFunction main) {
         this.renderer = renderer;
         this.main = main;
-        renderPoints = new ArrayList<>();
+        if (main.n != 2) {
+            throw new IllegalArgumentException("invalid function dimen, expected 2, given " + main.n);
+        }
         super.addListener(new DragListener() {
             public void drag(InputEvent event, float x, float y, int pointer) {
                 super.dragStop(event, x, y, pointer);
@@ -74,39 +77,47 @@ public class Graphic extends Actor implements InputProcessor {
     }
 
     float normalize(float y) {
-        return (float) Math.min(Math.max(y, getY()), getHeight() + getY());
+        return Math.min(Math.max(y, getY()), getHeight() + getY());
     }
 
     private void drawLine(double x1, double y1, double x2, double y2, float r) {
-        if (!(betweenX(x1) && betweenX(x2))) {
+        if (!(betweenX(x1) && betweenX(x2) && betweenY(y1) && betweenY(y2))) {
             return;
         }
-        if (betweenY(y1) || betweenY(y2)) {
-            renderer.rectLine(toRealX(x1), normalize(toRealY(y1)), toRealX(x2), normalize(toRealY(y2)), r);
-        } else if (between(y1, yl, y2) || between(y1, yr(), y2)) {
-            renderer.rectLine(toRealX(x1), normalize(toRealY(y1)), toRealX(x2), normalize(toRealY(y2)), r);
-        }
+        renderer.rectLine(toRealX(x1), normalize(toRealY(y1)), toRealX(x2), normalize(toRealY(y2)), r);
     }
 
-    public void setSecondary(Function<Double, Double> secondary) {
-        this.secondary = secondary;
+    private static double sqr(double t) {
+        return t * t;
     }
 
-    public void drawFunction(Function<Double, Double> func, float width) {
-        if (func == null) {
-            return;
-        }
-        final double STEP = 0.1 / scale;
-        for (double i = xl; i <= xr(); i += STEP) {
-            drawLine(i, func.apply(i), i + STEP, func.apply(i + STEP), width);
-            renderer.setColor(Color.BLACK);
+    private void drawLevel(final double level, final QuadraticFunction f, final float width) {
+        final double STEP = 1 / scale;
+        for (double x = xl; x < xr(); x += STEP) {
+            double qa = f.a.get(1).get(1) / 2;
+            double qb = f.a.get(0).get(1) * x + f.b.get(1);
+            double qc = f.a.get(0).get(0) / 2 * sqr(x) + f.b.get(0) * x + f.c - level;
+            double d = sqr(qb) - 4 * qa * qc;
+            assert d >= 0;
+            drawPoint(x, (-qb + Math.sqrt(d)) / (2 * qa), width);
+            drawPoint(x, (-qb - Math.sqrt(d)) / (2 * qa), width);
         }
     }
 
     @Override
     public void act(float time) {
-        drawFunction(main, 3);
-        drawFunction(secondary, 2);
+
+        for (int i = 1; i < main.renderPoints.size(); ++i) {
+            Value<Vector, Double> t = main.renderPoints.get(i);
+            if (i % 100 == 1) {
+                drawLevel(t.getFValue(), main, 1f);
+            }
+            renderer.setColor(Color.ORANGE);
+            drawPoint(t.getValue().get(0), t.getValue().get(1), 3);
+            renderer.setColor(Color.BLACK);
+            Value<Vector, Double> prev = main.renderPoints.get(i - 1);
+            drawLine(t.getValue().get(0), t.getValue().get(1), prev.getValue().get(0), prev.getValue().get(1), 1);
+        }
         drawLine(0, yl, 0, yr(), 2f);
         drawLine(xl, 0, xr(), 0, 2f);
         final float EPS = 0.02f;
@@ -115,10 +126,6 @@ public class Graphic extends Actor implements InputProcessor {
         }
         for (float i = (float) Math.floor(yl); i <= yr(); ++i) {
             drawLine(-EPS, i, EPS, i, 1f);
-        }
-        for (ColoredPoint p : renderPoints) {
-            renderer.setColor(p.color);
-            drawPoint(p.x, p.y, p.width);
         }
     }
 
@@ -176,7 +183,7 @@ public class Graphic extends Actor implements InputProcessor {
             scale += h;
         } else {
             scale -= 10;
-            scale = Math.max(scale, 50);
+            scale = Math.max(scale, 3);
         }
         return true;
     }
