@@ -27,19 +27,17 @@ public class NonlinearConjugateGradientMethod extends QuadraticMethod {
         while (gDist > eps) {
             if (counter == 0) {
                 gradient = f.gradient(x.getValue());
-                gDist = gradient.dist();
-                p = MatrixAlgebra.multiply(gradient, -1);
+                gDist = gradient.length();
+                p = gradient.multiply(-1);
             }
             counter = (counter + 1) % RESTART;
-            Vector mulResult = MatrixAlgebra.multiply(f.a, p);
-            double alpha = gDist * gDist / MatrixAlgebra.scalar(mulResult, p);
-            x.setValue(MatrixAlgebra.sum(x.getValue(), MatrixAlgebra.multiply(p, alpha)));
-            gradient = MatrixAlgebra.sum(gradient, MatrixAlgebra.multiply(mulResult, alpha)).force();
-            double newGDist = gradient.dist();
+            Vector mulResult = f.a.multiply(p);
+            double alpha = gDist * gDist / mulResult.scalarProduct(p);
+            x.setValue(x.getValue().sum(p.multiply(alpha)));
+            gradient = gradient.sum(mulResult.multiply(alpha));
+            double newGDist = gradient.length();
             double beta = newGDist * newGDist / (gDist * gDist);
-            p = MatrixAlgebra.sum(
-                    MatrixAlgebra.multiply(gradient, -1),
-                    MatrixAlgebra.multiply(p, beta)).force();
+            p = gradient.multiply(-1).sum(p.multiply(beta));
             gDist = newGDist;
         }
 

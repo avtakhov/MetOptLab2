@@ -14,12 +14,11 @@ public class GradientMethod extends QuadraticMethod {
         Vector gradX;
         double gradientDistance;
         double alpha = 100.;
-        while ((gradientDistance = (gradX = f.gradient(x.getValue())).dist()) > eps) {
+        while ((gradientDistance = (gradX = f.gradient(x.getValue())).length()) > eps) {
             while (true) {
                 Value<Vector, Double> y = new Value<>(
-                        MatrixAlgebra.sum(
-                                x.getValue(),
-                                MatrixAlgebra.multiply(gradX, -alpha / gradientDistance)).force(), f);
+                        x.getValue()
+                                .sum(gradX.multiply(-alpha / gradientDistance)), f);
                 if (y.getFValue() < x.getFValue()) {
                     x = y;
                     break;
