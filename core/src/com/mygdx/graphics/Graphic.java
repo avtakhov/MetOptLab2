@@ -19,7 +19,7 @@ public class Graphic extends Actor implements InputProcessor {
     private double xl = -1;
     private double yl = -1;
     private float scale = 200;
-    private final RenderFunction main;
+    private RenderFunction main;
 
     private double xr() {
         return xl + getWidth() / scale;
@@ -48,6 +48,10 @@ public class Graphic extends Actor implements InputProcessor {
                 return true;
             }
         });
+    }
+
+    public void setMain(RenderFunction function) {
+        main = function;
     }
 
     private boolean between(double x1, double x2, double x3) {
@@ -92,7 +96,7 @@ public class Graphic extends Actor implements InputProcessor {
     }
 
     private void drawLevel(final double level, final QuadraticFunction f, final float width) {
-        final double STEP = 0.2 / scale;
+        final double STEP = 0.1 / scale;
         for (double x = xl; x < xr(); x += STEP) {
             double qa = f.a.get(1).get(1) / 2;
             double qb = f.a.get(0).get(1) * x + f.b.get(1);
@@ -106,17 +110,18 @@ public class Graphic extends Actor implements InputProcessor {
 
     @Override
     public void act(float time) {
-
+        int maxLevels = 20;
         for (int i = 1; i < main.renderPoints.size(); ++i) {
             Value<Vector, Double> t = main.renderPoints.get(i);
-            if (i % 50 == 1) {
+            if (main.renderPoints.size() <= maxLevels || i % (main.renderPoints.size() / maxLevels) == 1) {
                 drawLevel(t.getFValue(), main, 1f);
             }
             renderer.setColor(Color.ORANGE);
             drawPoint(t.getValue().get(0), t.getValue().get(1), 3);
-            renderer.setColor(Color.BLACK);
+            renderer.setColor(Color.LIGHT_GRAY);
             Value<Vector, Double> prev = main.renderPoints.get(i - 1);
             drawLine(t.getValue().get(0), t.getValue().get(1), prev.getValue().get(0), prev.getValue().get(1), 1);
+            renderer.setColor(Color.BLACK);
         }
         drawLine(0, yl, 0, yr(), 2f);
         drawLine(xl, 0, xr(), 0, 2f);
@@ -177,7 +182,7 @@ public class Graphic extends Actor implements InputProcessor {
     @Override
     public boolean scrolled(float amountX, float amountY) {
         if (amountY == -1.0) {
-            final float h = 10;
+            final float h = (float) (10 + 5 * Math.sqrt(scale));
             xl = (xl * scale + h * unrealX(lastX)) / (h + scale);
             yl = (yl * scale + h * unrealY(lastY)) / (h + scale);
             scale += h;

@@ -1,7 +1,5 @@
 package com.mygdx.nmethods;
 
-import java.util.Collections;
-
 public class NonlinearConjugateGradientMethod<F extends QuadraticFunction> extends QuadraticMethod<F> {
 
     private final int RESTART;
@@ -34,10 +32,10 @@ public class NonlinearConjugateGradientMethod<F extends QuadraticFunction> exten
         counter = (counter + 1) % RESTART;
         Vector mulResult = getFunction().a.multiply(p);
         double alpha = gradientLength * gradientLength / mulResult.scalarProduct(p);
-        Value<Vector, Double> y = new Value<>(x.getValue().sum(p.multiply(alpha)), getFunction());
+        Value<Vector, Double> y = new Value<>(x.getValue().add(p.multiply(alpha)), getFunction());
         double newGDist = gradient.length();
         double beta = newGDist * newGDist / (gradientLength * gradientLength);
-        p = gradient.multiply(-1).sum(p.multiply(beta));
+        p = gradient.multiply(-1).add(p.multiply(beta));
         gradientLength = newGDist;
         return y;
     }

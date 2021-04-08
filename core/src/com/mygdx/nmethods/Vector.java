@@ -30,7 +30,7 @@ public class Vector extends AbstractList<Double> {
                 .collect(Collectors.toCollection(Vector::new));
     }
 
-    public Vector sum(List<Double> other) {
+    public Vector add(List<Double> other) {
         Vector result = new Vector();
         for (int i = 0; i < other.size(); i++) {
             result.add(this.coordinates.get(i) + other.get(i));

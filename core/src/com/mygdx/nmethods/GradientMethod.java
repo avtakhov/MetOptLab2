@@ -1,8 +1,5 @@
 package com.mygdx.nmethods;
 
-import java.util.Collections;
-import java.util.function.Function;
-
 public class GradientMethod<F extends NFunction> extends AbstractNMethod<F> {
 
     public GradientMethod(final F f) {
@@ -20,7 +17,7 @@ public class GradientMethod<F extends NFunction> extends AbstractNMethod<F> {
         double alpha = 1.;
         while (true) {
             Value<Vector, Double> y = new Value<>(
-                    x.getValue().sum(gradient.multiply(-alpha / gradientLength)),
+                    x.getValue().add(gradient.multiply(-alpha / gradientLength)),
                     getFunction());
             if (y.getFValue() < x.getFValue()) {
                 return y;

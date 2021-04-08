@@ -4,33 +4,30 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.*;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Slider;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.*;
+import com.mygdx.graphics.parser.ExpressionParser;
 import com.mygdx.methods.*;
 import com.mygdx.nmethods.*;
 import com.mygdx.nmethods.Vector;
 
 import java.util.*;
+import java.util.List;
 import java.util.function.Function;
 
 public class GraphicEngine extends ApplicationAdapter {
     private Batch batch;
-    private BitmapFont bitmapFont;
     private ShapeRenderer graphicRenderer;
     private Stage stage;
     private Graphic graphic;
     private RenderFunction func;
     private long start = System.currentTimeMillis();
+    private Input.TextInputListener input;
+    private BitmapFont bitmapFont;
+    private ExpressionParser parser;
 
     Slider slider;
     Texture sliderBackgroundTex;
@@ -44,8 +41,9 @@ public class GraphicEngine extends ApplicationAdapter {
         return new RenderFunction(a, Arrays.asList(-10.0, 30.0), 13);
     }
 
-    private void callTest() {
-        new DrawableNMethod(new GradientOpt<>(func, BrentCombMethod::new)).findMin(1e-2);
+    private void callTest(RenderFunction func) {
+        new DrawableNMethod(new GradientMethod<>(func)).findMin(1e-2);
+        graphic.setMain(func);
     }
 
     public void sleep(int fps) {
@@ -65,8 +63,23 @@ public class GraphicEngine extends ApplicationAdapter {
     @Override
     public void create() {
         sleep(10);
+        parser = new ExpressionParser();
         stage = new Stage();
+        bitmapFont = new BitmapFont();
         batch = stage.getBatch();
+        input = new Input.TextInputListener() {
+            @Override
+            public void input(String text) {
+                QuadraticFunction qf = parser.parse(text);
+                callTest(new RenderFunction(qf.a, qf.b, qf.c));
+            }
+
+            @Override
+            public void canceled() {
+                Gdx.input.getTextInput(input,"эй", "", "введи");
+            }
+        };
+
         graphicRenderer = new ShapeRenderer();
         graphic = new Graphic(graphicRenderer, func = initFunction());
         graphic.setBounds(50, 50, 800, 800);
@@ -75,7 +88,7 @@ public class GraphicEngine extends ApplicationAdapter {
         inputMultiplexer.addProcessor(graphic);
         inputMultiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(inputMultiplexer);
-        callTest();
+        Gdx.input.getTextInput(input, "Input function", "64*x*x + 126*x*y + 64*y*y - 10*x + 30*y + 13", "");
     }
 
     @Override

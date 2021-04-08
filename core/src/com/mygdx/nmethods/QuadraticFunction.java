@@ -1,8 +1,6 @@
 package com.mygdx.nmethods;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 public class QuadraticFunction implements NFunction {
 
@@ -38,7 +36,7 @@ public class QuadraticFunction implements NFunction {
     }
 
     public Vector gradient(Vector point) {
-        return a.multiply(point).sum(b);
+        return a.multiply(point).add(b);
     }
 
     @Override
