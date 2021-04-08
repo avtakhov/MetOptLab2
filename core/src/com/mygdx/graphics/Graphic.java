@@ -96,24 +96,29 @@ public class Graphic extends Actor implements InputProcessor {
     }
 
     private void drawLevel(final double level, final QuadraticFunction f, final float width) {
-        final double STEP = 0.1 / scale;
+        final double STEP = 1 / scale;
+        double y1 = Double.POSITIVE_INFINITY;
+        double y2 = Double.POSITIVE_INFINITY;
         for (double x = xl; x < xr(); x += STEP) {
             double qa = f.a.get(1).get(1) / 2;
             double qb = f.a.get(0).get(1) * x + f.b.get(1);
             double qc = f.a.get(0).get(0) / 2 * sqr(x) + f.b.get(0) * x + f.c - level;
             double d = sqr(qb) - 4 * qa * qc;
             assert d >= 0;
-            drawPoint(x, (-qb + Math.sqrt(d)) / (2 * qa), width);
-            drawPoint(x, (-qb - Math.sqrt(d)) / (2 * qa), width);
+            double y1b, y2b;
+            drawLine(x - STEP, y1, x, y1b = (-qb + Math.sqrt(d)) / (2 * qa), width);
+            drawLine(x - STEP, y2, x, y2b = (-qb - Math.sqrt(d)) / (2 * qa), width);
+            y1 = y1b;
+            y2 = y2b;
         }
     }
 
     @Override
     public void act(float time) {
-        int maxLevels = 20;
+        final int maxLevels = 50;
         for (int i = 1; i < main.renderPoints.size(); ++i) {
             Value<Vector, Double> t = main.renderPoints.get(i);
-            if (main.renderPoints.size() <= maxLevels || i % (main.renderPoints.size() / maxLevels) == 1) {
+            if (main.renderPoints.size() <= maxLevels || i % 20 == 1) {
                 drawLevel(t.getFValue(), main, 1f);
             }
             renderer.setColor(Color.ORANGE);

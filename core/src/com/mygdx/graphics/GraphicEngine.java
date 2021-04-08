@@ -35,6 +35,7 @@ public class GraphicEngine extends ApplicationAdapter {
 
     private RenderFunction initFunction() {
         // 64x^2 + 126xy + 64y^2 - 10x + 30y + 13
+        // 10*x*x + y*y - 5*x + 3*y + 1
         List<List<Double>> a = new ArrayList<>(2);
         a.add(Arrays.asList(128., 126.));
         a.add(Arrays.asList(126., 128.));
