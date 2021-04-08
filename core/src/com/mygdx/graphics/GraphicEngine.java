@@ -30,6 +30,7 @@ public class GraphicEngine extends ApplicationAdapter {
     private Stage stage;
     private Graphic graphic;
     private RenderFunction func;
+    private long start = System.currentTimeMillis();
 
     Slider slider;
     Texture sliderBackgroundTex;
@@ -44,11 +45,26 @@ public class GraphicEngine extends ApplicationAdapter {
     }
 
     private void callTest() {
-        new GradientMethod(func).findMin(1e-3);
+        new DrawableNMethod(new GradientOpt<>(func, BrentCombMethod::new)).findMin(1e-2);
+    }
+
+    public void sleep(int fps) {
+        if (fps > 0) {
+            long diff = System.currentTimeMillis() - start;
+            long targetDelay = 1000 / fps;
+            if (diff < targetDelay) {
+                try {
+                    Thread.sleep(targetDelay - diff);
+                } catch (InterruptedException ignored) {
+                }
+            }
+            start = System.currentTimeMillis();
+        }
     }
 
     @Override
     public void create() {
+        sleep(10);
         stage = new Stage();
         batch = stage.getBatch();
         graphicRenderer = new ShapeRenderer();
@@ -77,8 +93,6 @@ public class GraphicEngine extends ApplicationAdapter {
     @Override
     public void dispose() {
         stage.dispose();
-        bitmapFont.dispose();
-        batch.dispose();
         graphicRenderer.dispose();
     }
 }

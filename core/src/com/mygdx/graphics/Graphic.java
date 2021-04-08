@@ -32,8 +32,8 @@ public class Graphic extends Actor implements InputProcessor {
     public Graphic(ShapeRenderer renderer, RenderFunction main) {
         this.renderer = renderer;
         this.main = main;
-        if (main.n != 2) {
-            throw new IllegalArgumentException("invalid function dimen, expected 2, given " + main.n);
+        if (main.getN() != 2) {
+            throw new IllegalArgumentException("invalid function dimen, expected 2, given " + main.getN());
         }
         super.addListener(new DragListener() {
             public void drag(InputEvent event, float x, float y, int pointer) {
@@ -92,7 +92,7 @@ public class Graphic extends Actor implements InputProcessor {
     }
 
     private void drawLevel(final double level, final QuadraticFunction f, final float width) {
-        final double STEP = 1 / scale;
+        final double STEP = 0.2 / scale;
         for (double x = xl; x < xr(); x += STEP) {
             double qa = f.a.get(1).get(1) / 2;
             double qb = f.a.get(0).get(1) * x + f.b.get(1);
@@ -109,7 +109,7 @@ public class Graphic extends Actor implements InputProcessor {
 
         for (int i = 1; i < main.renderPoints.size(); ++i) {
             Value<Vector, Double> t = main.renderPoints.get(i);
-            if (i % 100 == 1) {
+            if (i % 50 == 1) {
                 drawLevel(t.getFValue(), main, 1f);
             }
             renderer.setColor(Color.ORANGE);

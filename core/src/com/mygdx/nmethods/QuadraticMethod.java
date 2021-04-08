@@ -1,9 +1,9 @@
 package com.mygdx.nmethods;
 
-public abstract class QuadraticMethod implements NMethod {
-    protected final QuadraticFunction f;
+public abstract class QuadraticMethod<F extends QuadraticFunction> extends AbstractNMethod<F> {
 
-    protected QuadraticMethod(QuadraticFunction f) {
-        this.f = f;
+    protected QuadraticMethod(final F func) {
+        super(func);
     }
+
 }

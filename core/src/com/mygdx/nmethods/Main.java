@@ -14,16 +14,15 @@ public class Main {
         // 64x^2 + 126xy + 64y^2 - 10x + 30y + 13
         QuadraticFunction f = new QuadraticFunction(a, Arrays.asList(-10.0, 30.0), 13);
 
-        QuadraticMethod method = new GradientMethod(f);
-        System.out.println("1 " + method.findMin(1e-5));
+        NMethod method = new GradientMethod<>(f);
+        System.out.println("1 " + method.findMin(1e-3));
 
-        QuadraticMethod method2 = new GradientOpt(f, GoldenSectionMethod::new);
-        System.out.println("2 " + method2.findMin(1e-5));
+        NMethod method2 = new GradientOpt<>(f, BrentCombMethod::new);
+        System.out.println("2 " + method2.findMin(1e-3));
 
-        QuadraticMethod method3 = new NonlinearConjugateGradientMethod(f);
-        System.out.println("3 " + method3.findMin(1e-5));
+        NMethod method3 = new NonlinearConjugateGradientMethod<>(f);
+        System.out.println("3 " + method3.findMin(1e-3));
 
-
-        System.out.println(f.apply(method2.findMin(1e-5)));
+        System.out.println(f.apply(method3.findMin(1e-3)));
     }
 }

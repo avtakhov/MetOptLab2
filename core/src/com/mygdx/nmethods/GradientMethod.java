@@ -1,32 +1,32 @@
 package com.mygdx.nmethods;
 
 import java.util.Collections;
+import java.util.function.Function;
 
-public class GradientMethod extends QuadraticMethod {
+public class GradientMethod<F extends NFunction> extends AbstractNMethod<F> {
 
-    public GradientMethod(final QuadraticFunction f) {
+    public GradientMethod(final F f) {
         super(f);
     }
 
     @Override
-    public Vector findMin(final double eps) {
-        Value<Vector, Double> x = new Value<>(new Vector(Collections.nCopies(f.n, 0.)), f);
-        Vector gradX;
-        double gradientDistance;
-        double alpha = 100.;
-        while ((gradientDistance = (gradX = f.gradient(x.getValue())).length()) > eps) {
-            while (true) {
-                Value<Vector, Double> y = new Value<>(
-                        x.getValue()
-                                .sum(gradX.multiply(-alpha / gradientDistance)), f);
-                if (y.getFValue() < x.getFValue()) {
-                    x = y;
-                    break;
-                } else {
-                    alpha /= 2;
-                }
+    public Value<Vector, Double> nextIteration(final Value<Vector, Double> x, final double eps) {
+        Vector gradient = getFunction().gradient(x.getValue());
+        double gradientLength = gradient.length();
+        if (gradientLength < eps) {
+            return null;
+        }
+
+        double alpha = 1.;
+        while (true) {
+            Value<Vector, Double> y = new Value<>(
+                    x.getValue().sum(gradient.multiply(-alpha / gradientLength)),
+                    getFunction());
+            if (y.getFValue() < x.getFValue()) {
+                return y;
+            } else {
+                alpha /= 2;
             }
         }
-        return x.getValue();
     }
 }

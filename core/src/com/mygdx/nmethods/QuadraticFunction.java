@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-public class QuadraticFunction implements Function<Vector, Double> {
+public class QuadraticFunction implements NFunction {
 
-    public final int n;
+    private final int n;
     public final Matrix a;
     public final Vector b;
     public final double c;
@@ -39,6 +39,11 @@ public class QuadraticFunction implements Function<Vector, Double> {
 
     public Vector gradient(Vector point) {
         return a.multiply(point).sum(b);
+    }
+
+    @Override
+    public int getN() {
+        return n;
     }
 
 }

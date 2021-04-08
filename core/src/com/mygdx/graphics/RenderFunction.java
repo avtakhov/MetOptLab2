@@ -18,7 +18,7 @@ public class RenderFunction extends QuadraticFunction {
     @Override
     public Double apply(final Vector arg) {
         Value<Vector, Double> value = new Value<>(arg, super::apply);
-        renderPoints.add(value);
+        // renderPoints.add(value);
         return value.getFValue();
     }
 

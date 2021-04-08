@@ -2,33 +2,24 @@ package com.mygdx.nmethods;
 
 import com.mygdx.methods.Method;
 
-import java.util.Collections;
 import java.util.function.Function;
 
-public class GradientOpt extends QuadraticMethod {
+public class GradientOpt<F extends NFunction> extends AbstractNMethod<F> {
 
     private final Function<Function<Double, Double>, Method> methodCreator;
-    public GradientOpt(final QuadraticFunction f, final Function<Function<Double, Double>, Method> methodCreator) {
+    public GradientOpt(final F f, final Function<Function<Double, Double>, Method> methodCreator) {
         super(f);
         this.methodCreator = methodCreator;
     }
 
     @Override
-    public Vector findMin(final double eps) {
-        Value<Vector, Double> x = new Value<>(new Vector(Collections.nCopies(f.n, 0.)), f);
-        while (true) {
-            Vector gradX;
-            if ((gradX = f.gradient(x.getValue())).length() < eps) {
-                break;
-            }
-            Value<Vector, Double> finalX = x;
-            Function<Double, Vector> func = t -> finalX.getValue().sum(gradX.multiply(-t));
-            double alpha = methodCreator.apply(func.andThen(f)).findMin(0., 1., eps);
-            Value<Vector, Double> y = new Value<>(func.apply(alpha), f);
-            if (y.getFValue() < x.getFValue()) {
-                x = y;
-            }
+    public Value<Vector, Double> nextIteration(final Value<Vector, Double> x, final double eps) {
+        final Vector gradient;
+        if ((gradient = getFunction().gradient(x.getValue())).length() < eps) {
+            return null;
         }
-        return x.getValue();
+        Function<Double, Vector> func = t -> x.getValue().sum(gradient.multiply(-t));
+        double alpha = methodCreator.apply(func.andThen(getFunction())).findMin(0., 1., eps / 100);
+        return new Value<>(func.apply(alpha), getFunction());
     }
 }
