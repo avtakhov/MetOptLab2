@@ -1,18 +1,11 @@
 package com.mygdx.nmethods;
 
+import com.mygdx.graphics.parser.ExpressionParser;
 import com.mygdx.methods.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        List<List<Double>> a = new ArrayList<>(2);
-        a.add(Arrays.asList(128., 126.));
-        a.add(Arrays.asList(126., 128.));
-        // 64x^2 + 126xy + 64y^2 - 10x + 30y + 13
-        QuadraticFunction f = new QuadraticFunction(a, Arrays.asList(-10.0, 30.0), 13);
+        QuadraticFunction f = new ExpressionParser().parse("10*x*x + y*y - 5*x + 3*y + 1");
 
         NMethod method = new GradientMethod<>(f);
         System.out.println("1 " + method.findMin(1e-3));

@@ -19,7 +19,7 @@ public class Graphic extends Actor implements InputProcessor {
     private double xl = -1;
     private double yl = -1;
     private float scale = 200;
-    private RenderFunction main;
+    private RenderFunction main = null;
 
     private double xr() {
         return xl + getWidth() / scale;
@@ -29,12 +29,8 @@ public class Graphic extends Actor implements InputProcessor {
         return yl + getHeight() / scale;
     }
 
-    public Graphic(ShapeRenderer renderer, RenderFunction main) {
+    public Graphic(ShapeRenderer renderer) {
         this.renderer = renderer;
-        this.main = main;
-        if (main.getN() != 2) {
-            throw new IllegalArgumentException("invalid function dimen, expected 2, given " + main.getN());
-        }
         super.addListener(new DragListener() {
             public void drag(InputEvent event, float x, float y, int pointer) {
                 super.dragStop(event, x, y, pointer);
@@ -51,6 +47,9 @@ public class Graphic extends Actor implements InputProcessor {
     }
 
     public void setMain(RenderFunction function) {
+        if (function.getN() != 2) {
+            throw new IllegalArgumentException("invalid dimen " + function.getN());
+        }
         main = function;
     }
 
@@ -95,39 +94,68 @@ public class Graphic extends Actor implements InputProcessor {
         return t * t;
     }
 
-    private void drawLevel(final double level, final QuadraticFunction f, final float width) {
-        final double STEP = 1 / scale;
-        double y1 = Double.POSITIVE_INFINITY;
-        double y2 = Double.POSITIVE_INFINITY;
-        for (double x = xl; x < xr(); x += STEP) {
-            double qa = f.a.get(1).get(1) / 2;
-            double qb = f.a.get(0).get(1) * x + f.b.get(1);
-            double qc = f.a.get(0).get(0) / 2 * sqr(x) + f.b.get(0) * x + f.c - level;
-            double d = sqr(qb) - 4 * qa * qc;
-            assert d >= 0;
-            double y1b, y2b;
-            drawLine(x - STEP, y1, x, y1b = (-qb + Math.sqrt(d)) / (2 * qa), width);
-            drawLine(x - STEP, y2, x, y2b = (-qb - Math.sqrt(d)) / (2 * qa), width);
-            y1 = y1b;
-            y2 = y2b;
+    private static class DoublePair {
+        private final double key;
+        private final double value;
+
+        public DoublePair(double key, double value) {
+            this.key = key;
+            this.value = value;
         }
+
+        public double getKey() {
+            return key;
+        }
+
+        public double getValue() {
+            return value;
+        }
+    }
+
+    private static DoublePair solveQuadraticEquation(double a, double b, double c) {
+        double d = sqr(b) - 4 * a * c;
+        assert d >= 0;
+        return new DoublePair((-b + Math.sqrt(d)) / (2 * a), (-b - Math.sqrt(d)) / (2 * a));
+    }
+
+    private void drawLevel(final double level, final QuadraticFunction f, final float width) {
+        final double STEP = 3 / scale;
+        double t1 = Double.POSITIVE_INFINITY;
+        double t2 = Double.POSITIVE_INFINITY;
+        for (double x = xl; x < xr(); x += STEP) {
+            DoublePair solve = solveQuadraticEquation(
+                    f.a.get(1).get(1) / 2,
+                    f.a.get(0).get(1) * x + f.b.get(1),
+                    f.a.get(0).get(0) / 2 * sqr(x) + f.b.get(0) * x + f.c - level);
+            drawLine(x - STEP, t1, x, solve.getKey(), width);
+            drawLine(x - STEP, t2, x, solve.getValue(), width);
+            t1 = solve.getKey();
+            t2 = solve.getValue();
+        }
+
+        t1 = t2 = Double.POSITIVE_INFINITY;
+        for (double y = yl; y < yr(); y += STEP) {
+            DoublePair solve = solveQuadraticEquation(
+                    f.a.get(0).get(0) / 2,
+                    f.a.get(0).get(1) * y + f.b.get(0),
+                    f.a.get(1).get(1) / 2 * sqr(y) + f.b.get(1) * y + f.c - level);
+            drawLine(t1, y - STEP, solve.getKey(), y, width);
+            drawLine(t2, y - STEP, solve.getValue(), y, width);
+
+            t1 = solve.getKey();
+            t2 = solve.getValue();
+        }
+
+
+    }
+
+    private void listPoint(List<Value<Vector, Double>> points, int index) {
+        renderer.setColor(Color.RED);
+        drawPoint(main.renderPoints.get(index).getValue().get(0), main.renderPoints.get(index).getValue().get(1), 3);
     }
 
     @Override
     public void act(float time) {
-        final int maxLevels = 50;
-        for (int i = 1; i < main.renderPoints.size(); ++i) {
-            Value<Vector, Double> t = main.renderPoints.get(i);
-            if (main.renderPoints.size() <= maxLevels || i % 20 == 1) {
-                drawLevel(t.getFValue(), main, 1f);
-            }
-            renderer.setColor(Color.ORANGE);
-            drawPoint(t.getValue().get(0), t.getValue().get(1), 3);
-            renderer.setColor(Color.LIGHT_GRAY);
-            Value<Vector, Double> prev = main.renderPoints.get(i - 1);
-            drawLine(t.getValue().get(0), t.getValue().get(1), prev.getValue().get(0), prev.getValue().get(1), 1);
-            renderer.setColor(Color.BLACK);
-        }
         drawLine(0, yl, 0, yr(), 2f);
         drawLine(xl, 0, xr(), 0, 2f);
         final float EPS = 0.02f;
@@ -136,6 +164,21 @@ public class Graphic extends Actor implements InputProcessor {
         }
         for (float i = (float) Math.floor(yl); i <= yr(); ++i) {
             drawLine(-EPS, i, EPS, i, 1f);
+        }
+        if (main != null) {
+            listPoint(main.renderPoints, 0);
+            for (int i = 1; i < main.renderPoints.size(); ++i) {
+                Value<Vector, Double> t = main.renderPoints.get(i);
+                Value<Vector, Double> prev = main.renderPoints.get(i - 1);
+                renderer.setColor(Color.BLACK);
+                drawLevel(t.getFValue(), main, 1);
+                renderer.setColor(Color.ORANGE);
+                drawPoint(t.getValue().get(0), t.getValue().get(1), 3);
+                renderer.setColor(Color.LIGHT_GRAY);
+                drawLine(t.getValue().get(0), t.getValue().get(1), prev.getValue().get(0), prev.getValue().get(1), 1);
+            }
+            listPoint(main.renderPoints, main.renderPoints.size() - 1);
+            renderer.setColor(Color.BLACK);
         }
     }
 
@@ -186,13 +229,13 @@ public class Graphic extends Actor implements InputProcessor {
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
+        final float h = (float) (10 + 5 * Math.sqrt(scale));
         if (amountY == -1.0) {
-            final float h = (float) (10 + 5 * Math.sqrt(scale));
             xl = (xl * scale + h * unrealX(lastX)) / (h + scale);
             yl = (yl * scale + h * unrealY(lastY)) / (h + scale);
             scale += h;
         } else {
-            scale -= 10;
+            scale -= h;
             scale = Math.max(scale, 3);
         }
         return true;

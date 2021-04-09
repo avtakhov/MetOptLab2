@@ -8,11 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RenderFunction extends QuadraticFunction {
-    public final List<Value<Vector, Double>> renderPoints;
+    public final List<Value<Vector, Double>> renderPoints = new ArrayList<>();
+
+    public RenderFunction(QuadraticFunction other) {
+        super(other.a, other.b, other.c);
+    }
 
     public RenderFunction(final List<List<Double>> a, final List<Double> b, final double c) {
         super(a, b, c);
-        renderPoints = new ArrayList<>();
     }
 
     @Override

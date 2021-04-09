@@ -24,72 +24,73 @@ public class GraphicEngine extends ApplicationAdapter {
     private Stage stage;
     private Graphic graphic;
     private RenderFunction func;
-    private long start = System.currentTimeMillis();
     private Input.TextInputListener input;
-    private BitmapFont bitmapFont;
     private ExpressionParser parser;
 
-    Slider slider;
-    Texture sliderBackgroundTex;
-    Texture sliderKnobTex;
-
-    private RenderFunction initFunction() {
-        // 64x^2 + 126xy + 64y^2 - 10x + 30y + 13
-        // 10*x*x + y*y - 5*x + 3*y + 1
-        List<List<Double>> a = new ArrayList<>(2);
-        a.add(Arrays.asList(128., 126.));
-        a.add(Arrays.asList(126., 128.));
-        return new RenderFunction(a, Arrays.asList(-10.0, 30.0), 13);
+    private void inputFunction(final String title) {
+        Gdx.input.getTextInput(input, title, "10*x*x - x*y + y*y - 2*x + y + 8", "");
     }
 
-    private void callTest(RenderFunction func) {
-        new DrawableNMethod(new GradientMethod<>(func)).findMin(1e-2);
+    private void callTest(RenderFunction func, Function<RenderFunction, AbstractNMethod<RenderFunction>> methodCreator) {
+        new DrawableNMethod(methodCreator.apply(func)).findMin(1e-2);
         graphic.setMain(func);
     }
 
-    public void sleep(int fps) {
-        if (fps > 0) {
-            long diff = System.currentTimeMillis() - start;
-            long targetDelay = 1000 / fps;
-            if (diff < targetDelay) {
-                try {
-                    Thread.sleep(targetDelay - diff);
-                } catch (InterruptedException ignored) {
-                }
+    private void addButton(
+            final String name,
+            final float x,
+            final float y,
+            final Function<RenderFunction, AbstractNMethod<RenderFunction>> methodCreator) {
+        Image b = new Image(new Texture("button_" + name + ".png"));
+        b.setPosition(x, y);
+        b.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                callTest(func, methodCreator);
             }
-            start = System.currentTimeMillis();
-        }
+        });
+        stage.addActor(b);
     }
 
     @Override
     public void create() {
-        sleep(10);
         parser = new ExpressionParser();
         stage = new Stage();
-        bitmapFont = new BitmapFont();
         batch = stage.getBatch();
         input = new Input.TextInputListener() {
             @Override
             public void input(String text) {
-                QuadraticFunction qf = parser.parse(text);
-                callTest(new RenderFunction(qf.a, qf.b, qf.c));
+                func = new RenderFunction(parser.parse(text));
             }
 
             @Override
             public void canceled() {
-                Gdx.input.getTextInput(input,"эй", "", "введи");
+                if (func == null) {
+                    inputFunction("эй");
+                }
             }
         };
-
+        inputFunction("Enter function, use +-*");
         graphicRenderer = new ShapeRenderer();
-        graphic = new Graphic(graphicRenderer, func = initFunction());
-        graphic.setBounds(50, 50, 800, 800);
+        graphic = new Graphic(graphicRenderer);
+        graphic.setBounds(50, 50, 900, 900);
         stage.addActor(graphic);
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(graphic);
         inputMultiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(inputMultiplexer);
-        Gdx.input.getTextInput(input, "Input function", "64*x*x + 126*x*y + 64*y*y - 10*x + 30*y + 13", "");
+        addButton("gradient-method", 1100, 800, GradientMethod::new);
+        addButton("optimized-gradient", 1100, 650, func -> new GradientOpt<>(func, BrentCombMethod::new));
+        addButton("conjugate-gradient", 1100, 500, NonlinearConjugateGradientMethod::new);
+        Image change = new Image(new Texture("button_change-function.png"));
+        change.setPosition(1100, 350);
+        change.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.input.getTextInput(input, "Input function", "10*x*x - x*y + y*y - 2*x + y + 8", "");
+            }
+        });
+        stage.addActor(change);
     }
 
     @Override
@@ -102,6 +103,7 @@ public class GraphicEngine extends ApplicationAdapter {
         stage.act();
         batch.end();
         graphicRenderer.end();
+        stage.draw();
     }
 
     @Override
