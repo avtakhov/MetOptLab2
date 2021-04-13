@@ -149,8 +149,8 @@ public class Graphic extends Actor implements InputProcessor {
 
     }
 
-    private void listPoint(List<Value<Vector, Double>> points, int index) {
-        renderer.setColor(Color.RED);
+    private void listPoint(int index, Color color) {
+        renderer.setColor(color);
         drawPoint(main.renderPoints.get(index).getValue().get(0), main.renderPoints.get(index).getValue().get(1), 3);
     }
 
@@ -166,7 +166,7 @@ public class Graphic extends Actor implements InputProcessor {
             drawLine(-EPS, i, EPS, i, 1f);
         }
         if (main != null) {
-            listPoint(main.renderPoints, 0);
+            listPoint(0, Color.YELLOW);
             for (int i = 1; i < main.renderPoints.size(); ++i) {
                 Value<Vector, Double> t = main.renderPoints.get(i);
                 Value<Vector, Double> prev = main.renderPoints.get(i - 1);
@@ -177,7 +177,7 @@ public class Graphic extends Actor implements InputProcessor {
                 renderer.setColor(Color.LIGHT_GRAY);
                 drawLine(t.getValue().get(0), t.getValue().get(1), prev.getValue().get(0), prev.getValue().get(1), 1);
             }
-            listPoint(main.renderPoints, main.renderPoints.size() - 1);
+            listPoint(main.renderPoints.size() - 1, Color.RED);
             renderer.setColor(Color.BLACK);
         }
     }

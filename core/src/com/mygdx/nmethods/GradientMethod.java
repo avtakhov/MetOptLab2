@@ -23,6 +23,10 @@ public class GradientMethod<F extends NFunction> extends AbstractNMethod<F> {
                 return y;
             } else {
                 alpha /= 2;
+                if (alpha == 0) {
+                    // can't find :(
+                    return null;
+                }
             }
         }
     }
