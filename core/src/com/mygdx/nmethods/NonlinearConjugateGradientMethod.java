@@ -19,20 +19,21 @@ public class NonlinearConjugateGradientMethod<F extends QuadraticFunction> exten
 
     @Override
     public Value<Vector, Double> nextIteration(final Value<Vector, Double> x, final double eps) {
-        if (gradientLength < eps) {
-            gradientLength = Double.POSITIVE_INFINITY;
-            counter = 0;
-            return null;
-        }
         if (counter == 0) {
             gradient = getFunction().gradient(x.getValue());
             gradientLength = gradient.length();
             p = gradient.multiply(-1);
         }
+        if (gradientLength < eps) {
+            gradientLength = Double.POSITIVE_INFINITY;
+            counter = 0;
+            return null;
+        }
         counter = (counter + 1) % RESTART;
         Vector mulResult = getFunction().a.multiply(p);
         double alpha = gradientLength * gradientLength / mulResult.scalarProduct(p);
         Value<Vector, Double> y = new Value<>(x.getValue().add(p.multiply(alpha)), getFunction());
+        gradient = gradient.add(mulResult.multiply(alpha));
         double newGDist = gradient.length();
         double beta = newGDist * newGDist / (gradientLength * gradientLength);
         p = gradient.multiply(-1).add(p.multiply(beta));

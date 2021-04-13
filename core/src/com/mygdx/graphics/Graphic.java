@@ -143,7 +143,7 @@ public class Graphic extends Actor implements InputProcessor {
     }
 
     private void drawLevel(final double level, final QuadraticFunction f, final float width) {
-        final double STEP = 3 / scale;
+        final double STEP = 6 / scale;
         if (!draw_levels) {
             return;
         }
