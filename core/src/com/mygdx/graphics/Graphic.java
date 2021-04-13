@@ -1,10 +1,14 @@
 package com.mygdx.graphics;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.scenes.scene2d.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
+import com.badlogic.gdx.utils.Align;
 import com.mygdx.nmethods.QuadraticFunction;
 import com.mygdx.nmethods.Value;
 import com.mygdx.nmethods.Vector;
@@ -20,6 +24,8 @@ public class Graphic extends Actor implements InputProcessor {
     private double yl = -1;
     private float scale = 200;
     private RenderFunction main = null;
+    public boolean draw_levels = true;
+    private Label label;
 
     private double xr() {
         return xl + getWidth() / scale;
@@ -29,8 +35,25 @@ public class Graphic extends Actor implements InputProcessor {
         return yl + getHeight() / scale;
     }
 
-    public Graphic(ShapeRenderer renderer) {
+    private void labelInit() {
+        Label.LabelStyle label1Style = new Label.LabelStyle(new BitmapFont(), Color.BLACK);
+        label1Style.font = new BitmapFont();
+        label1Style.fontColor = Color.BLACK;
+
+        label = new Label("penis",label1Style);
+        label.setSize(Gdx.graphics.getWidth(),50);
+        label.setPosition(0,getHeight() + 50);
+        label.setAlignment(Align.center);
+        getStage().addActor(label);
+    }
+
+
+    public Graphic(ShapeRenderer renderer, Stage stage) {
         this.renderer = renderer;
+        System.out.println(this.getX());
+        stage.addActor(this);
+
+        labelInit();
         super.addListener(new DragListener() {
             public void drag(InputEvent event, float x, float y, int pointer) {
                 super.dragStop(event, x, y, pointer);
@@ -41,6 +64,7 @@ public class Graphic extends Actor implements InputProcessor {
             public boolean mouseMoved (InputEvent event, float x, float y) {
                 lastX = x;
                 lastY = y;
+                label.setText(unrealX(x) + " " + unrealY(y));
                 return true;
             }
         });
@@ -120,6 +144,9 @@ public class Graphic extends Actor implements InputProcessor {
 
     private void drawLevel(final double level, final QuadraticFunction f, final float width) {
         final double STEP = 3 / scale;
+        if (!draw_levels) {
+            return;
+        }
         double t1 = Double.POSITIVE_INFINITY;
         double t2 = Double.POSITIVE_INFINITY;
         for (double x = xl; x < xr(); x += STEP) {
