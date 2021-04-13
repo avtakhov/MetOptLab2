@@ -9,14 +9,18 @@ public class QuadraticFunction implements NFunction {
     public final Vector b;
     public final double c;
 
-    public QuadraticFunction(final List<List<Double>> a, List<Double> b, final double c) {
+    public QuadraticFunction(final Matrix a, List<Double> b, final double c) {
         this.n = b.size();
         if (a.stream().anyMatch(arr -> arr.size() != n) || a.size() != n) {
             throw new IllegalArgumentException("Invalid arrays sizes " + n);
         }
-        this.a = new Matrix(a);
+        this.a = a;
         this.b = new Vector(b);
         this.c = c;
+    }
+
+    public QuadraticFunction(final List<List<Double>> a, List<Double> b, final double c) {
+        this(new Matrix(a), b, c);
     }
 
     @Override
