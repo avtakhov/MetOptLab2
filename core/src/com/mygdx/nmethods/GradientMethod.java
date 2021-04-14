@@ -25,7 +25,7 @@ public class GradientMethod<F extends NFunction> extends AbstractNMethod<F> {
                 alpha /= 2;
                 if (alpha == 0) {
                     // can't find :(
-                    return null;
+                    throw new ArithmeticException("alpha equals 0");
                 }
             }
         }

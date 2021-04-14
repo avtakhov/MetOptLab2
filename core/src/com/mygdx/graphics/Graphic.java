@@ -143,7 +143,7 @@ public class Graphic extends Actor implements InputProcessor {
     }
 
     private void drawLevel(final double level, final QuadraticFunction f, final float width) {
-        final double STEP = 6 / scale;
+        final double STEP = 3 / scale;
         if (!draw_levels) {
             return;
         }
@@ -201,7 +201,7 @@ public class Graphic extends Actor implements InputProcessor {
                 drawLevel(t.getFValue(), main, 1);
                 renderer.setColor(Color.ORANGE);
                 drawPoint(t.getValue().get(0), t.getValue().get(1), 3);
-                renderer.setColor(Color.LIGHT_GRAY);
+                renderer.setColor(Color.BLUE);
                 drawLine(t.getValue().get(0), t.getValue().get(1), prev.getValue().get(0), prev.getValue().get(1), 1);
             }
             listPoint(main.renderPoints.size() - 1, Color.RED);

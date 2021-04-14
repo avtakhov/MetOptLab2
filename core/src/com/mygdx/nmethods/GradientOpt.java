@@ -18,7 +18,6 @@ public class GradientOpt<F extends NFunction> extends AbstractNMethod<F> {
         if ((gradient = getFunction().gradient(x.getValue())).length() < eps) {
             return null;
         }
-
         Function<Double, Vector> func = t -> x.getValue().add(gradient.multiply(-t));
         double alpha = methodCreator.apply(func.andThen(getFunction())).findMin(0., 1., eps);
         return new Value<>(func.apply(alpha), getFunction());
