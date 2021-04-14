@@ -12,8 +12,8 @@ public class Main {
                 .parse("64 * x * x + 126 * x * y + 64 * y * y - 10 * x + 30 * y + 13");
         final double eps = 1e-3;
         List<Double> squareCoeffs = new ArrayList<>();
-        int n = 100;
-        int k = 500;
+        int n = 10;
+        int k = 50;
         double val = 1;
         for (double i = 0, step = (double) k / n; i < n; i++) {
             squareCoeffs.add(val);
@@ -22,7 +22,7 @@ public class Main {
         List<Double> linearCoeffs = new ArrayList<>();
         Random rand = new Random();
         for (int i = 0; i < n; i++) {
-            linearCoeffs.add((double) Math.abs(rand.nextInt()));
+            linearCoeffs.add((double) Math.abs(rand.nextInt() % k));
         }
         System.out.println(squareCoeffs.size());
         DiagonalFunction megaNDim = new DiagonalFunction(squareCoeffs, linearCoeffs, 228);
@@ -61,9 +61,15 @@ public class Main {
             counter.findMin(eps);
             System.out.println("Count of iterations with " + nameKey + " : " + counter.getCountIteration());
         }
-        System.out.println("Test on n = " + n + "   k = " + k);
-        MethodCounter<DiagonalFunction> methodCounter = new MethodCounter<>(new NonlinearConjugateGradientMethod<>(megaNDim));
-        methodCounter.findMin(eps);
-        System.out.println("Iterations " + methodCounter.getCountIteration());
+        System.out.println("Test on n = " + n + ", k = " + k);
+        MethodCounter<DiagonalFunction> methodCounter1 = new MethodCounter<>(new GradientMethod<>(megaNDim));
+        MethodCounter<DiagonalFunction> methodCounter2 = new MethodCounter<>(new GradientOpt<>(megaNDim,  func -> new DichotomyMethod(func, eps)));
+        MethodCounter<DiagonalFunction> methodCounter3 = new MethodCounter<>(new NonlinearConjugateGradientMethod<>(megaNDim));
+        methodCounter1.findMin(eps);
+        System.out.println("Iterations on default gradient " + methodCounter1.getCountIteration());
+        methodCounter2.findMin(eps);
+        System.out.println("Iterations on optimized gradient " + methodCounter2.getCountIteration());
+        methodCounter3.findMin(eps);
+        System.out.println("Iterations on conjugate gradient " + methodCounter3.getCountIteration());
     }
 }
