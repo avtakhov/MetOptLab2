@@ -17,6 +17,12 @@ public class NonlinearConjugateGradientMethod<F extends QuadraticFunction> exten
         this(f, f.getN());
     }
 
+    /**
+     * Performs a single iteration of minimization according to the Conjugate Gradient method.
+     * @param x The current minima value
+     * @param eps tolerance
+     * @return The next minima value
+     */
     @Override
     public Value<Vector, Double> nextIteration(final Value<Vector, Double> x, final double eps) {
         if (counter == 0) {
