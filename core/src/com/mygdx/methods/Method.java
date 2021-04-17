@@ -4,11 +4,11 @@ public interface Method {
 
 
     /**
-     * Searches for a function's local minima in range [left, right] within an eps-tolerance.
+     * Searches for a function's local minima in range {@code [left, right]} within an eps-tolerance.
      * @param left left limit
      * @param right right limit
      * @param eps tolerance
-     * @return the minima eps-close to the real one.
+     * @return the minima {@code eps}-close to the real one.
      */
     double findMin(double left, double right, double eps);
 }

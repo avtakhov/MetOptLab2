@@ -11,7 +11,7 @@ public class QuadraticFunction implements NFunction {
 
     /**
      * Creates a function instance with specified coefficients.
-     * The function is equivalent to ax^2/2 + bx + c
+     * The function is equivalent to {@code ax^2/2 + bx + c}
      * @throws IllegalArgumentException if the matrix isn't quadratic.
      * @param a Matrix
      * @param b Vector
@@ -62,7 +62,7 @@ public class QuadraticFunction implements NFunction {
     /**
      * Returns the function's gradient vector at a specified point.
      * The gradient is a vector of derivatives.
-     * For quadratic functions it's equal to a * point + b
+     * For quadratic functions it's equal to {@code a * point + b}
      * @param point point where the gradient is calculated.
      * @return the gradient.
      */

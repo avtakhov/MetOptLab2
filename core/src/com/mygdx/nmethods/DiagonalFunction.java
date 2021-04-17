@@ -9,8 +9,8 @@ public class DiagonalFunction extends QuadraticFunction {
 
     /**
      * Creates an instance of a DiagonalFunction with values from a specified List.
-     * Diagonal function is represented as Ax^2/2 where A is a diagonal matrix.
-     * A[i][i] = 2b[i]
+     * Diagonal function is represented as {@code Ax^2/2} where {@code A} is a diagonal matrix.
+     * {@code A[i][i] = 2b[i]}
      * @param b list of values on the diagonal
      */
     public DiagonalFunction(List<Double> b) {
@@ -35,7 +35,7 @@ public class DiagonalFunction extends QuadraticFunction {
     /**
      * Returns the result of applying function to the argument.
      * @param arg the argument
-     * @return f(arg)
+     * @return {@code f(arg)}
      */
     @Override
     public Double apply(Vector arg) {

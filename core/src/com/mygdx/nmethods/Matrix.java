@@ -36,8 +36,8 @@ public class Matrix extends AbstractList<List<Double>> {
 
     /**
      * Returns the value of a matrix in r-th row and c-th column.
-     * @param r r
-     * @param c c
+     * @param r row
+     * @param c ccolumn
      * @return the value of a matrix in r-th row and c-th column.
      */
     public double get(final int r, final int c) {
