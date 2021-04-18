@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DiagonalMatrix extends Matrix{
+    /**
+     * Constructs a Diagonal Matrix from a list of it's diagonal's values.
+     * @param a diagonal's values
+     */
     public DiagonalMatrix(List<Double> a) {
         super(generateDiagonal(a));
     }
@@ -32,6 +36,11 @@ public class DiagonalMatrix extends Matrix{
         return diagonalMatrix;
     }
 
+    /**
+     * Returns a result of multiplying the matrix by a vector
+     * @param other the vector
+     * @return the result of multiplication.
+     */
     @Override
     public Vector multiply(final Vector other) {
         Vector result = new Vector();

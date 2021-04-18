@@ -2,9 +2,13 @@ package com.mygdx.methods;
 
 public interface Method {
 
+
     /**
-     * Принимает левую(left) и правую(right) границы поиска минимума и точность поиска eps
-     * Возвращает найденный в зависимости от eps минимум
+     * Searches for a function's local minima in range {@code [left, right]} within an eps-tolerance.
+     * @param left left limit
+     * @param right right limit
+     * @param eps tolerance
+     * @return the minima {@code eps}-close to the real one.
      */
     double findMin(double left, double right, double eps);
 }

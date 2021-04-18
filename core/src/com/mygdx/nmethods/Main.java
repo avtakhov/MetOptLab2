@@ -7,6 +7,11 @@ import java.util.*;
 import java.util.function.Function;
 
 public class Main {
+
+    /**
+     * Runs the application.
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         QuadraticFunction f = new ExpressionParser()
                 .parse("64 * x * x + 126 * x * y + 64 * y * y - 10 * x + 30 * y + 13");

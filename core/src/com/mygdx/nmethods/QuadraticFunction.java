@@ -9,6 +9,14 @@ public class QuadraticFunction implements NFunction {
     public final Vector b;
     public final double c;
 
+    /**
+     * Creates a function instance with specified coefficients.
+     * The function is equivalent to {@code ax^2/2 + bx + c}
+     * @throws IllegalArgumentException if the matrix isn't quadratic.
+     * @param a Matrix
+     * @param b Vector
+     * @param c Constant
+     */
     public QuadraticFunction(final Matrix a, List<Double> b, final double c) {
         this.n = b.size();
         if (a.stream().anyMatch(arr -> arr.size() != n) || a.size() != n) {
@@ -19,10 +27,22 @@ public class QuadraticFunction implements NFunction {
         this.c = c;
     }
 
+    /**
+     * Same as {@link QuadraticFunction#QuadraticFunction(Matrix, List, double)}
+     * but the first argument is represented as a List of Lists
+     * @param a Matrix
+     * @param b Vector
+     * @param c Constant
+     */
     public QuadraticFunction(final List<List<Double>> a, List<Double> b, final double c) {
         this(new Matrix(a), b, c);
     }
 
+    /**
+     * Applies the function to the argument.
+     * @param arg the argument
+     * @return f(arg) = a(arg)/2 + b(arg) + c
+     */
     @Override
     public Double apply(Vector arg) {
         double result = 0;
@@ -39,10 +59,21 @@ public class QuadraticFunction implements NFunction {
         return result;
     }
 
+    /**
+     * Returns the function's gradient vector at a specified point.
+     * The gradient is a vector of derivatives.
+     * For quadratic functions it's equal to {@code a * point + b}
+     * @param point point where the gradient is calculated.
+     * @return the gradient.
+     */
     public Vector gradient(Vector point) {
         return a.multiply(point).add(b);
     }
 
+    /**
+     * Returns the function's dimensionality
+     * @return n =)
+     */
     @Override
     public int getN() {
         return n;
