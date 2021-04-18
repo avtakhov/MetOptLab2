@@ -2,6 +2,7 @@ package com.mygdx.nmethods;
 
 import com.mygdx.methods.Method;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 public class GradientOpt<F extends NFunction> extends AbstractNMethod<F> {
@@ -31,9 +32,8 @@ public class GradientOpt<F extends NFunction> extends AbstractNMethod<F> {
         if ((gradient = getFunction().gradient(x.getValue())).length() < eps) {
             return null;
         }
-
         Function<Double, Vector> func = t -> x.getValue().add(gradient.multiply(-t));
-        double alpha = methodCreator.apply(func.andThen(getFunction())).findMin(0., 1., eps);
+        double alpha = methodCreator.apply(getFunction().compose(func)).findMin(0., (double) 2 / 50, eps);
         return new Value<>(func.apply(alpha), getFunction());
     }
 }

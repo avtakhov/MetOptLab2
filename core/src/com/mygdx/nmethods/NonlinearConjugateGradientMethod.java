@@ -42,6 +42,9 @@ public class NonlinearConjugateGradientMethod<F extends QuadraticFunction> exten
         gradient = gradient.add(mulResult.multiply(alpha));
         double newGDist = gradient.length();
         double beta = newGDist * newGDist / (gradientLength * gradientLength);
+        if (counter == 0) {
+            beta = 0;
+        }
         p = gradient.multiply(-1).add(p.multiply(beta));
         gradientLength = newGDist;
         return y;

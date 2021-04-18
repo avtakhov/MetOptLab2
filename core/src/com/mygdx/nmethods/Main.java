@@ -16,13 +16,22 @@ public class Main {
         QuadraticFunction f = new ExpressionParser()
                 .parse("64 * x * x + 126 * x * y + 64 * y * y - 10 * x + 30 * y + 13");
         final double eps = 1e-3;
-        List<Double> list = new ArrayList<>();
-        Random rand = new Random();
-        for (int i = 0; i < 100; i++) {
-            list.add(Math.abs((double) rand.nextInt()));
+        List<Double> squareCoeffs = new ArrayList<>();
+        int n = 10;
+        int k = 50;
+        double val = 1;
+        for (double i = 0, step = (double) k / n; i < n; i++) {
+            squareCoeffs.add(val);
+            val += step;
         }
-        DiagonalFunction megaNDim = new DiagonalFunction(list);
-        NFunction nDimFunc = new NFunction() {
+        List<Double> linearCoeffs = new ArrayList<>();
+        Random rand = new Random();
+        for (int i = 0; i < n; i++) {
+            linearCoeffs.add((double) Math.abs(rand.nextInt() % k));
+        }
+        System.out.println(squareCoeffs.size());
+        DiagonalFunction megaNDim = new DiagonalFunction(squareCoeffs, linearCoeffs, 228);
+        NFunction threeDimFunc = new NFunction() {
             @Override
             public Double apply(Vector arg) {
                 double x = arg.get(0);
@@ -48,14 +57,24 @@ public class Main {
         oneDimensionalMethods.put("dichotomy", (func) -> new DichotomyMethod(func, eps));
         oneDimensionalMethods.put("golden section", GoldenSectionMethod::new);
         oneDimensionalMethods.put("brent", BrentCombMethod::new);
+        MethodCounter<QuadraticFunction> defaultGradientCounter = new MethodCounter<>(new GradientMethod<>(f));
+        defaultGradientCounter.findMin(eps);
+        System.out.println("eps: " + eps);
+        System.out.println("Count of iterations on default: " + defaultGradientCounter.getCountIteration());
         for (String nameKey : oneDimensionalMethods.keySet()) {
             MethodCounter<QuadraticFunction> counter = new MethodCounter<>(new GradientOpt<>(f, oneDimensionalMethods.get(nameKey)));
             counter.findMin(eps);
             System.out.println("Count of iterations with " + nameKey + " : " + counter.getCountIteration());
         }
-        MethodCounter<DiagonalFunction> methodCounter = new MethodCounter<>(new NonlinearConjugateGradientMethod<>(megaNDim));
-        System.out.println(megaNDim.gradient(new Vector(Collections.nCopies(100, 0.))));
-        methodCounter.findMin(eps);
-        System.out.println("cums " + methodCounter.getCountIteration());
+        System.out.println("Test on n = " + n + ", k = " + k);
+        MethodCounter<DiagonalFunction> methodCounter1 = new MethodCounter<>(new GradientMethod<>(megaNDim));
+        MethodCounter<DiagonalFunction> methodCounter2 = new MethodCounter<>(new GradientOpt<>(megaNDim,  func -> new DichotomyMethod(func, eps)));
+        MethodCounter<DiagonalFunction> methodCounter3 = new MethodCounter<>(new NonlinearConjugateGradientMethod<>(megaNDim));
+        methodCounter1.findMin(eps);
+        System.out.println("Iterations on default gradient " + methodCounter1.getCountIteration());
+        methodCounter2.findMin(eps);
+        System.out.println("Iterations on optimized gradient " + methodCounter2.getCountIteration());
+        methodCounter3.findMin(eps);
+        System.out.println("Iterations on conjugate gradient " + methodCounter3.getCountIteration());
     }
 }

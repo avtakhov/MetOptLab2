@@ -9,12 +9,14 @@ public class DiagonalFunction extends QuadraticFunction {
 
     /**
      * Creates an instance of a DiagonalFunction with values from a specified List.
-     * Diagonal function is represented as {@code Ax^2/2} where {@code A} is a diagonal matrix.
-     * {@code A[i][i] = 2b[i]}
-     * @param b list of values on the diagonal
+     * Diagonal function is represented as {@code Ax^2/2 + Bx + C} where {@code A} is a diagonal matrix.
+     * {@code A[i][i] = 2 * a[i]}
+     * @param a list of values on the diagonal
+     * @param b B coefficients
+     * @param c C constant
      */
-    public DiagonalFunction(List<Double> b) {
-        super(new DiagonalMatrix(b), Collections.nCopies(b.size(), 0.), 0);
+    public DiagonalFunction(List<Double> a, List<Double> b, double c) {
+        super(new DiagonalMatrix(a), b, c);
     }
 
     /**
@@ -24,10 +26,10 @@ public class DiagonalFunction extends QuadraticFunction {
      * @return Ax
      */
     @Override
-    public Vector gradient(Vector point){
+    public Vector gradient(Vector point) {
         Vector result = new Vector();
         for (int i = 0; i < point.size(); i++) {
-            result.add(point.get(i) * a.get(i, i));
+            result.add(point.get(i) * a.get(i, i) + b.get(i));
         }
         return result;
     }
@@ -41,8 +43,9 @@ public class DiagonalFunction extends QuadraticFunction {
     public Double apply(Vector arg) {
         double result = 0.;
         for (int i = 0; i < arg.size(); i++) {
-            result += arg.get(i) * arg.get(i) * a.get(i, i) / 2;
+            result += arg.get(i) * arg.get(i) * a.get(i, i) / 2 + arg.get(i) * b.get(i);
         }
+        result += c;
         return result;
     }
 }
